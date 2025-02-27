@@ -1,0 +1,35 @@
+---
+title: "Research Questions?"
+author: "Summer Heschong"
+date: "2025-02-27"
+output: pdf_document
+---
+#Setup
+```{r setup}
+library(here)
+library(tidyverse)
+library(readxl)
+library(dplyr)
+
+#load data
+wetland_data <- read_excel(here 
+                ('Data/Raw/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.xlsx'),
+                col_names = TRUE,
+                skip = 2)
+
+#save data as csv file
+write.csv(wetland_data, 
+          here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.csv'), 
+          row.names = FALSE)
+```
+
+#Arrange Data
+```{r arrange}
+#Which sites have the most observations? 
+wetland_data %>%
+  count(`Station Name`) %>%
+  arrange(desc(n))
+
+```
+
+
