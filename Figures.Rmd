@@ -1,0 +1,56 @@
+---
+title: "Figures"
+author: "Summer Heschong"
+date: "2025-03-05"
+output: html_document
+---
+#Setup 
+```{r setup}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+#load data
+wetland_data <- read.csv(here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.csv'))
+
+```
+
+#Inspect and Wrangle data
+```{r wrangle}
+#select our sites from data set
+project_sites <- wetland_data %>%
+  filter(Site %in% c(1014, 1018, 1150))
+
+#I tried to make some graphs and I think there might not be enough data for sites 1014 and 1018
+
+#filter for just NWCA project sites
+NWCA <- wetland_data %>%
+  filter(Project == 'NWCA Intensification')
+
+#see which sites in the NWCA project have the most observations
+sort(table(NWCA$Site), decreasing = TRUE)
+
+#lets try 1161 and 1012 instead? 
+
+#ok we might have to pick sites that aren't in the NWCA project. There's a lot less data than it seems because all the water quality parameters are grouped in one column
+
+#which sites overall have the most observations?
+sort(table(wetland_data$Site), decreasing = TRUE)
+
+#Hog Farm Upper, Walmart, and Nahunta are all in project Headwater and they have up and downstream data
+
+#create a dataset for each site
+
+
+```
+
+#Visualize data
+```{r visualize}
+#Compare water quality parameters upstream and downstream for same site
+
+```
+
+
+
+
