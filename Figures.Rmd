@@ -18,9 +18,6 @@ wetland_data <- read.csv(here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-20
 
 #Inspect and Wrangle data
 ```{r wrangle}
-#select our sites from data set
-project_sites <- wetland_data %>%
-  filter(Site %in% c(1014, 1018, 1150))
 
 #I tried to make some graphs and I think there might not be enough data for sites 1014 and 1018
 
@@ -41,14 +38,38 @@ sort(table(wetland_data$Site), decreasing = TRUE)
 #Hog Farm Upper, Walmart, and Nahunta are all in project Headwater and they have up and downstream data
 
 #create a dataset for each site
+HogFarm <- wetland_data %>%
+  filter(Site == 'Hog Farm Upper')
 
+Walmart <- wetland_data %>%
+  filter(Site == 'Walmart')
 
+Nahunta <- wetland_data %>%
+  filter(Site == 'Nahunta')
 ```
 
 #Visualize data
 ```{r visualize}
 #Compare water quality parameters upstream and downstream for same site
 
+#First filter dataset for one parameter
+HogFarm_pH <- HogFarm %>%
+  filter(Parameter == 'pH')
+
+#create histograms of parameter by location
+HogFarm_pH_hist <- ggplot(HogFarm_pH, aes(x = Result, fill = Location.Type)) +
+  geom_histogram(bins = 6, binwidth = 0.2, color = 'black') +
+  facet_wrap(~Location.Type)
+
+HogFarm_pH_hist
+
+#create scatterplot of parameter by location
+HogFarm_ph_scatter <- ggplot(HogFarm_pH, aes(x = Location.Type, y = Result)) +
+  geom_point(size = 3, alpha = 0.5)
+
+HogFarm_ph_scatter
+
+#Should we combine Downstream and Further Downstream?
 ```
 
 
