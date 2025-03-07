@@ -46,10 +46,15 @@ Walmart <- wetland_data %>%
 
 Nahunta <- wetland_data %>%
   filter(Site == 'Nahunta')
+
+#create a dataset with just our sites
+Project_sites <- wetland_data %>%
+  filter(Site %in% c('Hog Farm Upper', 'Walmart', 'Nahunta'))
 ```
 
 #Visualize data
-```{r visualize}
+##Water quality upstream vs downstream
+```{r visualize up and dwn}
 #Compare water quality parameters upstream and downstream for same site
 
 #First filter dataset for one parameter
@@ -72,6 +77,22 @@ HogFarm_ph_scatter
 #Should we combine Downstream and Further Downstream?
 ```
 
+## Metal Concentrations and pH
+```{r visualize metal}
+#first filter data for pH and copper (can change for other metals) and separate them into 2 columns
 
+metal_vs_pH <- Project_sites %>%
+  select(Station.Name, Parameter, Result) %>%
+  filter(Parameter == 'Copper' | Parameter == 'pH') %>%
+  pivot_wider(names_from = Parameter, values_from = Result, values_fn = mean)
+#there were duplicate values when i first did pivot_wider so i used the mean of the duplicates. Idk how much this matters statistically? 
+
+#create a scatterplot to examine relationship between metal concentrations and pH
+ggplot(metal_vs_pH, aes(x = pH, y = Copper)) +
+  geom_point() +
+  geom_smooth(method = lm)
+
+#I don't think this plot really works?
+```
 
 
