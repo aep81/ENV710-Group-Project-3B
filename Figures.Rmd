@@ -10,6 +10,7 @@ library(here)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(moments)
 
 #load data
 wetland_data <- read.csv(here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.csv'))
@@ -95,4 +96,139 @@ ggplot(metal_vs_pH, aes(x = pH, y = Copper)) +
 #I don't think this plot really works?
 ```
 
+# If lead concentrations at each site meet standards (one-sample t-test)
+
+```{r TBD}
+
+```
+
+# How lead concetrations differ by reach in hogfarm
+
+```{r Create Filtered Datasets}
+#Note to Summer and Nicole: Once I learn how, I would like to try a two-way ANOVA for both site and reach. What do you guys think? Is our end goal to just stick to one site?
+
+Hogfarm_upstream_pb <- HogFarm %>%
+  filter(Location.Type=="Upstream",
+         Parameter=="Lead")
+
+Hogfarm_downstream_pb <- HogFarm %>%
+    filter(Location.Type=="Downstream",
+         Parameter=="Lead")
+
+Hogfarm_further_downstream_pb <- HogFarm %>%
+    filter(Location.Type=="Further Downstream",
+         Parameter=="Lead")
+
+#Further Downstream has a sample size of 11 for lead lmao
+```
+
+``` {r Skewness and Kurtosis}
+
+#Calculate skewness and kurtosis for Upstream
+
+skewness(Hogfarm_upstream_pb$Result, na.rm = TRUE)
+
+kurtosis(Hogfarm_upstream_pb$Result, na.rm = TRUE)
+
+#Calculate skewness and kurtosis for Downstream
+
+skewness(Hogfarm_downstream_pb$Result, na.rm = TRUE)
+
+kurtosis(Hogfarm_downstream_pb$Result, na.rm = TRUE)
+
+#Calculate skewness and kurtosis for Further Downstream
+
+skewness(Hogfarm_further_downstream_pb$Result, na.rm = TRUE)
+
+kurtosis(Hogfarm_further_downstream_pb$Result, na.rm = TRUE)
+
+
+
+```
+
+I am going to go ahead and say it is safe to log transform these values. Fingers crossed!
+
+```{r Log Transform}
+
+#Make new log datasets
+Hogfarm_Upstream_log <- Hogfarm_upstream_pb %>%
+  mutate(Result=log10(Result))
+
+Hogfarm_Downstream_log <- Hogfarm_downstream_pb %>%
+  mutate(Result=log10(Result))
+
+Hogfarm_Further_Downstream_log <- Hogfarm_further_downstream_pb %>%
+  mutate(Result=log10(Result))
+
+#Check histogram of each before even checking skewness or kurtosis
+
+ggplot(Hogfarm_Upstream_log, aes(x=Result)) +
+  geom_histogram()
+
+ggplot(Hogfarm_Downstream_log, aes(x=Result)) +
+  geom_histogram()
+
+ggplot(Hogfarm_Further_Downstream_log, aes(x=Result)) +
+  geom_histogram()
+
+
+#Yeah I am gonna do a KW test. Tbh this test will likely not get used but a) It's a start and b) Let's just see what kind of data we get
+```
+
+```{r Kruskal-Wallis}
+
+#Filter whole hogfarm dataset for just lead
+
+Hogfarm_Lead <- HogFarm %>%
+  filter(Parameter=="Lead")
+
+kruskal_test <- kruskal.test(Result ~ Location.Type, data = Hogfarm_Lead)
+
+kruskal_test #Display result
+```
+
+
+Ok so with that 0.31 p-value, I am just gonna make the figure lol.
+
+```{r Communicating Hogfarm Lead Results, fig.cap="Distributions of lead concentrations (ppb) in upstream, downstream, and father downstream of Hogfarm headwaters in the Coastal Plains."}
+#Calculate median and SD
+Hogfarm_Lead_Summary <- Hogfarm_Lead %>%
+  group_by(Location.Type) %>%
+  summarize(mean=mean(Result, na.rm = TRUE),
+            sd=sd(Result, na.rm = TRUE)) %>%
+  ungroup()
+
+Hogfarm_Lead_Summary <- Hogfarm_Lead_Summary %>%
+  rename(Result = mean)
+
+Hogfarm_Lead_Fig <- ggplot() +
+  geom_jitter(data = Hogfarm_Lead,
+              aes(x=Location.Type,
+                  y=Result,
+                  color=Location.Type),
+              alpha=0.5,
+              size=0.5) +
+  geom_point(data=Hogfarm_Lead_Summary,
+             aes(x=Location.Type, 
+                 y=Result,
+                 color=Location.Type),
+             size=3) +
+  geom_errorbar(data=Hogfarm_Lead_Summary,
+                aes(x=Location.Type,
+                    ymin=Result-sd,
+                    ymax=Result+sd,
+                    color=Location.Type),
+                width=0.10, size=1) +
+  annotate("text", x="Upstream", y=150, label="a", size=8) +
+  annotate("text", x="Downstream", y=150, label="a", size=8) +
+  annotate("text", x="Further Downstream", y=150, label="a", size=8) +
+  scale_color_manual(values=c("darkorange","purple","cyan4")) +
+  labs(x="Reach",
+       y="Pb Concentrations (ppb)") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+Hogfarm_Lead_Fig
+
+```
 
