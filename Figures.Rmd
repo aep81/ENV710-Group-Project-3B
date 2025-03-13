@@ -230,7 +230,7 @@ Hogfarm_Lead_Fig <- ggplot() +
 
 Hogfarm_Lead_Fig
 
-ggsave(Hogfarm_Lead_Fig, filename="Hogfarm_Lead_Fig.jpg", height=12, width=25, units="cm")
+ggsave(Hogfarm_Lead_Fig, filename="Hogfarm_Lead_Fig.jpg", height=20, width=20, units="cm")
 
 
 ```
