@@ -1,0 +1,78 @@
+---
+title: "Nicole_PlotsTest"
+output: html_document
+date: "2025-03-12"
+---
+
+## Bringing in the data - from the other doc to keep the names/ formatting the same
+
+```{r}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(moments)
+library(lubridate)
+
+#load data
+wetland_data <- read.csv(here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.csv'))
+
+HogFarm <- wetland_data %>%
+  filter(Site == 'Hog Farm Upper')
+
+Walmart <- wetland_data %>%
+  filter(Site == 'Walmart')
+
+Nahunta <- wetland_data %>%
+  filter(Site == 'Nahunta')
+
+#create a dataset with just our sites
+Project_sites <- wetland_data %>%
+  filter(Site %in% c('Hog Farm Upper', 'Walmart', 'Nahunta'))
+
+Project_sites$Sample.Date <- mdy(Project_sites$Sample.Date)
+
+str(Project_sites$Sample.Date)
+```
+
+##Organizing the data: Total N values for our sites
+I summed ammonia and NO3+NO2 values to get an approximate total N value for each site by each day (with grouping)
+
+```{r}
+N_Sites_Upstream <- Project_sites %>% 
+  filter(Parameter %in% c("NO2+NO3", "Ammonia"),
+         Location.Type %in% "Upstream")
+
+N_Sites_Upstream2 <- N_Sites_Upstream %>% 
+  group_by(Sample.Date, Site) %>% 
+  summarize(TotalN = sum(Result, na.rm = T))
+  
+glimpse(N_Sites_Upstream2)
+
+N_Sites_Downstream <- Project_sites %>% 
+  filter(Parameter %in% c("NO2+NO3", "Ammonia"),
+         Location.Type %in% c("Downstream", "Further Downstream"))
+
+N_Sites_Downstream2 <- N_Sites_Downstream %>% 
+  group_by(Sample.Date, Site) %>% 
+  summarize(TotalN = sum(Result, na.rm = T))
+
+```
+
+## Plotting over time
+
+```{r}
+
+N_Sites_Upstream2$Site <- as.factor(N_Sites_Upstream2$Site)
+
+N_upstream_plot <- ggplot(N_Sites_Upstream2, aes(x = Sample.Date, y = TotalN, color = Site, group = Site)) +
+  labs(title = "Total N Over Time by Site",
+       x = "Date",
+       y = "Total N",
+       color = "Site") +
+  theme_bw()
+
+N_upstream_plot
+
+```
+
