@@ -224,11 +224,14 @@ Hogfarm_Lead_Fig <- ggplot() +
   annotate("text", x="Further Downstream", y=150, label="a", size=8) +
   scale_color_manual(values=c("darkorange","purple","cyan4")) +
   labs(x="Reach",
-       y="Pb Concentrations (ppb)") +
+       y="Pb Concentrations (ppb)", caption = "Distributions of lead concentrations (ppb) in upstream, downstream, and father downstream of Hogfarm headwaters in the Coastal Plains.") +
   theme_bw() +
   theme(legend.position = "none")
 
 Hogfarm_Lead_Fig
+
+ggsave(Hogfarm_Lead_Fig, filename="Hogfarm_Lead_Fig.jpg", height=12, width=15, units="cm")
+
 
 ```
 
