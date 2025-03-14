@@ -13,6 +13,7 @@ library(tidyverse)
 library(ggplot2)
 library(moments)
 library(lubridate)
+library(scales)
 
 #load data
 wetland_data <- read.csv(here('Data/Processed/WQ-Data-NCDWR-2005-to-2015-NCSU-2015-to-2019.csv'))
@@ -47,6 +48,7 @@ N_Sites_Upstream2 <- N_Sites_Upstream %>%
   group_by(Sample.Date, Site) %>% 
   summarize(TotalN = sum(Result, na.rm = T))
   
+
 glimpse(N_Sites_Upstream2)
 
 N_Sites_Downstream <- Project_sites %>% 
@@ -57,15 +59,15 @@ N_Sites_Downstream2 <- N_Sites_Downstream %>%
   group_by(Sample.Date, Site) %>% 
   summarize(TotalN = sum(Result, na.rm = T))
 
+
 ```
 
 ## Plotting over time
 
 ```{r}
 
-N_Sites_Upstream2$Site <- as.factor(N_Sites_Upstream2$Site)
-
 N_upstream_plot <- ggplot(N_Sites_Upstream2, aes(x = Sample.Date, y = TotalN, color = Site, group = Site)) +
+  geom_point()+
   labs(title = "Total N Over Time by Site",
        x = "Date",
        y = "Total N",
@@ -73,6 +75,80 @@ N_upstream_plot <- ggplot(N_Sites_Upstream2, aes(x = Sample.Date, y = TotalN, co
   theme_bw()
 
 N_upstream_plot
+
+```
+
+## Summarize by Collection Month
+
+```{r}
+
+N_Sites_Upstream2 <- N_Sites_Upstream2 %>%
+  mutate(Month = format(Sample.Date, "%b"))
+
+#summed month values over all years - didn't think it was useful
+#N_Monthly_Summary <- N_Sites_Upstream2 %>% 
+#  group_by(Month, Site) %>% 
+#  summarise(MonthlyN = sum(TotalN, na.rm = T))
+
+
+N_monthly_plot <- ggplot(N_Sites_Upstream2, aes(x = Month, y = TotalN, color = Site, group = Site)) +
+  geom_point()+
+  labs(title = "Total N by Month and Site",
+       x = "Date",
+       y = "Total N",
+       color = "Site") +
+  theme_bw()
+
+N_monthly_plot
+
+```
+
+## Attempting all obs of all sites?
+
+```{r}
+
+N_Sites <- Project_sites %>% 
+  filter(Parameter %in% c("NO2+NO3", "Ammonia"))
+
+N_Sites2 <- N_Sites %>% 
+  group_by(Sample.Date, Site) %>% 
+  summarize(TotalN = sum(Result, na.rm = T))
+
+N_Sites2 <- N_Sites2 %>%
+  mutate(Month = format(Sample.Date, "%b"))
+
+hogfarm_alllocs_N <- N_Sites2 %>% 
+  filter(Site == "Hog Farm Upper")
+
+N_hog_plot1 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
+  geom_point()+
+  labs(title = "Hog Farm Total N by Month",
+       x = "Date",
+       y = "Total N") +
+  theme_bw()
+
+N_hog_plot1
+
+N_hog_plot2 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
+  #geom_point()+
+  geom_boxplot()+
+  labs(title = "Hog Farm Total N by Month",
+       x = "Date",
+       y = "Total N") +
+  theme_bw()
+
+N_hog_plot2
+
+```
+
+## Anova/ KW for month and concentration
+
+```{r}
+
+N_hog_anova <- aov(TotalN ~ Month, data = hogfarm_alllocs_N)
+summary(N_hog_anova)
+
+kruskal.test(TotalN ~ Month, data = hogfarm_alllocs_N)
 
 ```
 
