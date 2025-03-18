@@ -59,21 +59,51 @@ Project_sites <- wetland_data %>%
 #Compare water quality parameters upstream and downstream for same site
 
 #First filter dataset for one parameter
-HogFarm_pH <- HogFarm %>%
-  filter(Parameter == 'pH')
+HogFarm_DO <- HogFarm %>%
+  filter(Parameter == 'Dissolved Oxygen (%)') %>%
+  mutate(Location.Type = case_when(
+    Location.Type == "Further Downstream"~"Downstream",
+    TRUE ~ Location.Type))
 
 #create histograms of parameter by location
-HogFarm_pH_hist <- ggplot(HogFarm_pH, aes(x = Result, fill = Location.Type)) +
-  geom_histogram(bins = 6, binwidth = 0.2, color = 'black') +
-  facet_wrap(~Location.Type)
+HogFarm_DO_hist <- ggplot(HogFarm_DO, aes(x = Result, fill = Location.Type)) +
+  geom_histogram(bins = 6, binwidth = 12, color = 'black') +
+  facet_wrap(~Location.Type) +
+  labs(title = "Dissolved Oxygen Higher Downstream than Upstream in Coastal Wetland",
+       caption = "Histogram comparing Dissolved Oxygen (%) \n upstream vs. downstream at a coastal plain wetland in Samson County, NC",
+       x = "Dissolved Oxygen (%)",
+       fill = "Location") +
+  theme(plot.caption = element_text(hjust = 0.5),
+        plot.title = element_text(hjust = 0.5))
 
-HogFarm_pH_hist
+HogFarm_DO_hist
+
+#save plot as .jpeg
+ggsave(HogFarm_DO_hist, filename="GutkowskiNHeschongSPowerAFig1.jpg", 
+       height=20, width=20, units="cm")
 
 #create scatterplot of parameter by location
 HogFarm_ph_scatter <- ggplot(HogFarm_pH, aes(x = Location.Type, y = Result)) +
   geom_point(size = 3, alpha = 0.5)
-
 HogFarm_ph_scatter
+
+#create boxplot
+HogFarm_DO_box <- ggplot(HogFarm_DO, aes(x = Location.Type, y = Result, 
+                                         fill = Location.Type)) +
+  geom_boxplot() +
+  labs(title = "Dissolved Oxygen Higher Downstream than Upstream in Coastal Wetland",
+       caption = "Dissolved Oxygen (%) upstream vs. downstream at a coastal plain wetland in Sampson County, NC",
+       x = "Location",
+       y = "Dissolved Oxygen (%)") +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0.5),
+        plot.title = element_text(hjust = 0.5))
+
+HogFarm_DO_box
+
+#save plot
+ggsave(HogFarm_DO_box, filename="GutkowskiNHeschongSPowerAFig2.jpg", 
+       height=20, width=20, units="cm")
 
 #Should we combine Downstream and Further Downstream?
 ```
@@ -224,11 +254,14 @@ Hogfarm_Lead_Fig <- ggplot() +
   annotate("text", x="Further Downstream", y=150, label="a", size=8) +
   scale_color_manual(values=c("darkorange","purple","cyan4")) +
   labs(x="Reach",
-       y="Pb Concentrations (ppb)") +
+       y="Pb Concentrations (ppb)", caption = "Figure x: Distributions of lead concentrations (ppb) in upstream, downstream, and \n father downstream of Hogfarm headwaters in the Coastal Plains.") +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", plot.caption = element_text(hjust = 0.5))
 
 Hogfarm_Lead_Fig
+
+ggsave(Hogfarm_Lead_Fig, filename="Hogfarm_Lead_Fig.jpg", height=20, width=20, units="cm")
+
 
 ```
 
