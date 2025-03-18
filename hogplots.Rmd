@@ -1,11 +1,10 @@
 ---
-title: "Nicole_PlotsTest"
+title: "hogplots"
 output: html_document
-date: "2025-03-12"
+date: "2025-03-14"
 ---
-
-## Bringing in the data - from the other doc to keep the names/ formatting the same
-
+  ## Bringing in the data - from the other doc to keep the names/ formatting the same
+  
 ```{r}
 library(here)
 library(dplyr)
@@ -36,6 +35,7 @@ Project_sites$Sample.Date <- mdy(Project_sites$Sample.Date)
 str(Project_sites$Sample.Date)
 ```
 
+
 ##Organizing the data: Total N values for our sites
 I summed ammonia and NO3+NO2 values to get an approximate total N value for each site by each day (with grouping)
 
@@ -47,7 +47,7 @@ N_Sites_Upstream <- Project_sites %>%
 N_Sites_Upstream2 <- N_Sites_Upstream %>% 
   group_by(Sample.Date, Site) %>% 
   summarize(TotalN = sum(Result, na.rm = T))
-  
+
 
 glimpse(N_Sites_Upstream2)
 
@@ -129,19 +129,13 @@ N_hog_plot1 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
 
 N_hog_plot1
 
-hogfarm_alllocs_N$Month <- factor(hogfarm_alllocs_N$Month, 
-                                  levels = c("Jan", "Feb", "Mar","Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
-
 N_hog_plot2 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
   #geom_point()+
   geom_boxplot()+
-  labs(title = "Hog Farm Upper Total Nitrogen by Month",
-       x = "Month",
-       y = "Total N (mg/L)",
-       caption = "Figure 2: Total Nitrogen concentrations at the Hog Farm Upper site over the course of the year. \n Summed ammonia, nitrate, and nitrite concentrations were used \n to represent the total nitrogen value. \n Monthly values included 'upstream', 'downstream', and 'further downstream' measurements."
-  )+
-  theme_bw()+
-  theme(plot.caption = element_text(size = 10, hjust = 0.5))
+  labs(title = "Hog Farm Total N by Month",
+       x = "Date",
+       y = "Total N") +
+  theme_bw()
 
 N_hog_plot2
 
