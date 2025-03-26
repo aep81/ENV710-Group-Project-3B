@@ -120,6 +120,9 @@ N_Sites2 <- N_Sites2 %>%
 hogfarm_alllocs_N <- N_Sites2 %>% 
   filter(Site == "Hog Farm Upper")
 
+hogfarm_alllocs_N$Month <- factor(hogfarm_alllocs_N$Month, 
+                                  levels = c("Jan", "Feb", "Mar","Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
 N_hog_plot1 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
   geom_point()+
   labs(title = "Hog Farm Total N by Month",
@@ -129,8 +132,6 @@ N_hog_plot1 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
 
 N_hog_plot1
 
-hogfarm_alllocs_N$Month <- factor(hogfarm_alllocs_N$Month, 
-                                  levels = c("Jan", "Feb", "Mar","Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
 
 N_hog_plot2 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
   #geom_point()+
@@ -138,7 +139,7 @@ N_hog_plot2 <- ggplot(hogfarm_alllocs_N, aes(x = Month, y = TotalN)) +
   labs(title = "Hog Farm Upper Total Nitrogen by Month",
        x = "Month",
        y = "Total N (mg/L)",
-       caption = "Figure 2: Total Nitrogen concentrations at the Hog Farm Upper site over the course of the year. \n Summed ammonia, nitrate, and nitrite concentrations were used \n to represent the total nitrogen value. \n Monthly values included 'upstream', 'downstream', and 'further downstream' measurements."
+       caption = "Figure 2: Total Nitrogen concentrations at the Hog Farm Upper site over the course \n of the year. Summed ammonia, nitrate, and nitrite concentrations were used \n to represent the total nitrogen value. Monthly values included \n 'upstream', 'downstream', and 'further downstream' measurements."
   )+
   theme_bw()+
   theme(plot.caption = element_text(size = 10, hjust = 0.5))
