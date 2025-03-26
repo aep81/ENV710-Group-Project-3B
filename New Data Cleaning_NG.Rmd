@@ -1,0 +1,53 @@
+---
+title: "New Data Cleaning_NG"
+output: html_document
+---
+
+```{r}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(moments)
+library(readxl)
+library(lubridate)
+
+```
+
+
+```{r}
+
+YSI_2012_2015_1 <- read_excel('Data/Raw/SWAMP YSI-compiled-2012-2015.xlsx')
+
+YSI_2015_2025_1 <- read_excel('Data/Raw/SWAMP YSI-compiled-2015-2025.xlsx')
+
+DFDG_2011_2025_1 <- read_excel('Data/Raw/DFDG2011-2025-summary.xlsx')
+
+```
+
+## YSI 2012-2015
+
+```{r}
+
+#Selecting the columns I want
+
+YSI_2012_2015_2 <- YSI_2012_2015_1 %>% 
+  select("Date", "Site", "Temp C", "SpCond mS/cm", 
+         "Cond mS/cm", "TDS mg/L", "Salinity ppt", 
+         "DO %", "DO mg/L", "pH", "TSS mg/L")
+
+#converting all measurements to numeric value
+
+YSI_2012_2015_3 <- YSI_2012_2015_2 %>% 
+  mutate(across(c("Temp C","SpCond mS/cm","Cond mS/cm", 
+                  "TDS mg/L", "Salinity ppt", 
+                  "DO %","DO mg/L", "pH", "TSS mg/L" ), as.numeric))
+
+#converting dates to date format
+
+YSI_2012_2015_4 <- YSI_2012_2015_3 %>% 
+  mutate(Date = ymd(Date))
+  
+```
+
+
