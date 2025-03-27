@@ -21,7 +21,7 @@ YSI_2012_2015_1 <- read_excel('Data/Raw/SWAMP YSI-compiled-2012-2015.xlsx')
 
 YSI_2015_2025_1 <- read_excel('Data/Raw/SWAMP YSI-compiled-2015-2025.xlsx')
 
-DFDG_2011_2025_1 <- read_excel('Data/Raw/DFDG2011-2025-summary.xlsx')
+Nutrients_2011_2025_1 <- read.csv('Data/Raw/Nutrients2011_2025-summary.csv')
 
 ```
 
@@ -137,8 +137,79 @@ YSI_2012_2015_6 <- YSI_2012_2015_5 %>%
 
 YSI_Combined <- bind_rows(YSI_2012_2015_6, YSI_2015_2025_6)
 
-write.csv(YSI_Combined, "Data/Processed/YSI_Combined.csv", row.names = FALSE)
+#write.csv(YSI_Combined, "Data/Processed/YSI_Combined.csv", row.names = FALSE)
 ```
+
+## Nutrients Dataset
+
+```{r}
+
+Nutrients_2011_2025_2 <- Nutrients_2011_2025_1 %>% 
+ mutate(across(c("Unfiltered_TN_ugL","Filtered_NOx_ugL","Filtered_NHx_ugL", 
+                 "Unfiltered_TP_.ugL","Filtered_OP_ugL","TSS_mgL",
+                 "fecal_coliform_colonies_per100mL"), as.numeric)) %>%
+  rename(tracking_no = "Tracking.No.", 
+         Date = "Date", 
+         Site = "Site",
+         Rep = "Rep",
+         Unfiltered_TN_ugL = "Unfiltered_TN_ugL",
+         Filtered_NOx_ugL = "Filtered_NOx_ugL",
+         Filtered_NHx_ugL = "Filtered_NHx_ugL",
+         Unfiltered_TP_ugL = "Unfiltered_TP_.ugL",
+         Filtered_OP_ugL = "Filtered_OP_ugL",
+         TSS_mgL = "TSS_mgL", 
+         fecal_coliform_colonies_per100mL = "fecal_coliform_colonies_per100mL") %>% 
+  mutate(Date = mdy(Date))
+
+Nutrients_2011_2025_3 <- Nutrients_2011_2025_2 %>% 
+  group_by(Site, Date) %>% 
+  summarise(across(where(is.numeric), mean, na.rm = T), .groups = "drop")
+  
+
+  
+```
+
+
+## Prep to combine the data
+```{r}
+
+YSI_Combined <- YSI_Combined %>%
+  mutate(Site = gsub("-", "", Site))
+
+common_sites <- intersect(unique(YSI_Combined$Site), unique(Nutrients_2011_2025_3$Site))
+print(common_sites)
+
+YSI_Combined <- YSI_Combined %>%
+  filter(Site %in% common_sites)
+
+Nutrients_2011_2025_3 <- Nutrients_2011_2025_3 %>%
+  filter(Site %in% common_sites)
+
+
+
+```
+
+## Combined Data Final???
+
+```{r}
+
+Combined_Data <- full_join(YSI_Combined, Nutrients_2011_2025_3, by = c("Site", "Date"))
+
+Combined_Data <- Combined_Data %>%
+  select(-Rep) %>%  
+  mutate_if(is.numeric, ~ ifelse(is.nan(.), NA, .))
+
+#write.csv(Combined_Data, "Data/Processed/Combined_Data.csv", row.names = FALSE)
+
+data <- read.csv("Data/Processed/Combined_Data.csv")
+
+Combined_Data_NArm <- data %>% 
+  drop_na()
+
+#write.csv(Combined_Data_NArm, "Data/Processed/Combined_Data_NArm.csv", row.names = FALSE)
+
+```
+
 
 
 ## next steps - organize the nutrients data
