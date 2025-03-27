@@ -25,6 +25,61 @@ DFDG_2011_2025_1 <- read_excel('Data/Raw/DFDG2011-2025-summary.xlsx')
 
 ```
 
+## YSI 2015-2025
+
+```{r}
+
+#Selecting the columns I want
+
+YSI_2015_2025_2 <- YSI_2015_2025_1 %>% 
+  select("Date", "Site", "Temperature, C",
+         "Dissolved O2, %", "Dissolved O2, mg/L", 
+         "Sp. Conductivity, uS/cm at 25C", "Conductivity, uS/cm", 
+         "TDS, mg/L", "Salinity, ‰", "pH" )
+
+#converting all measurements to numeric value
+
+YSI_2015_2025_3 <- YSI_2015_2025_2 %>% 
+  mutate(across(c("Temperature, C",
+         "Dissolved O2, %", "Dissolved O2, mg/L", 
+         "Sp. Conductivity, uS/cm at 25C", "Conductivity, uS/cm", 
+         "TDS, mg/L", "Salinity, ‰", "pH" ), as.numeric))
+
+#converting dates to date format
+
+YSI_2015_2025_4  <- YSI_2015_2025_3 %>%
+  mutate(Date = ymd(Date),
+         Month = month(Date),
+         Year = year(Date)) 
+
+
+YSI_2015_2025_5 <- YSI_2015_2025_4 %>% 
+  rename(Date = Date, 
+         Site = Site, 
+         Temp_C = "Temperature, C", 
+         SpCond_mScm = "Sp. Conductivity, uS/cm at 25C", 
+         Cond_mScm = "Conductivity, uS/cm", 
+         TDS_mgl = "TDS, mg/L",   
+         Sal_ppt = "Salinity, ‰", 
+         DO_percent = "Dissolved O2, %", 
+         DO_mgL = "Dissolved O2, mg/L", 
+         pH = "pH", 
+         Month = Month, 
+         Year = Year)
+
+YSI_2015_2025_6 <- YSI_2015_2025_5 %>%
+  mutate(SpCond_mScm = SpCond_mScm/1000,
+         Cond_mScm = Cond_mScm/1000) %>% 
+  mutate(Season = case_when(
+    Month %in% c(12, 1, 2) ~ "Winter",
+    Month %in% c(3, 4, 5)  ~ "Spring",
+    Month %in% c(6, 7, 8)  ~ "Summer",
+    Month %in% c(9, 10, 11) ~ "Fall"
+  ))
+  
+```
+
+
 ## YSI 2012-2015
 
 ```{r}
@@ -34,20 +89,61 @@ DFDG_2011_2025_1 <- read_excel('Data/Raw/DFDG2011-2025-summary.xlsx')
 YSI_2012_2015_2 <- YSI_2012_2015_1 %>% 
   select("Date", "Site", "Temp C", "SpCond mS/cm", 
          "Cond mS/cm", "TDS mg/L", "Salinity ppt", 
-         "DO %", "DO mg/L", "pH", "TSS mg/L")
+         "DO %", "DO mg/L", "pH")
 
 #converting all measurements to numeric value
 
 YSI_2012_2015_3 <- YSI_2012_2015_2 %>% 
   mutate(across(c("Temp C","SpCond mS/cm","Cond mS/cm", 
                   "TDS mg/L", "Salinity ppt", 
-                  "DO %","DO mg/L", "pH", "TSS mg/L" ), as.numeric))
+                  "DO %","DO mg/L", "pH"), as.numeric))
 
 #converting dates to date format
 
 YSI_2012_2015_4 <- YSI_2012_2015_3 %>% 
-  mutate(Date = ymd(Date))
-  
+  mutate(Date = ymd(Date),
+         Month = month(Date),
+         Year = year(Date))
+
+#changing column names for consistency
+
+YSI_2012_2015_5 <- YSI_2012_2015_4 %>% 
+  rename(Date = Date, 
+         Site = Site, 
+         Temp_C = "Temp C" , 
+         SpCond_mScm = "SpCond mS/cm", 
+         Cond_mScm = "Cond mS/cm", 
+         TDS_mgl = "TDS mg/L"  ,   
+         Sal_ppt = "Salinity ppt" , 
+         DO_percent = "DO %" , 
+         DO_mgL = "DO mg/L", 
+         pH = "pH", 
+         Month = Month, 
+         Year = Year)
+
+YSI_2012_2015_6 <- YSI_2012_2015_5 %>%
+  mutate(Season = case_when(
+    Month %in% c(12, 1, 2) ~ "Winter",
+    Month %in% c(3, 4, 5)  ~ "Spring",
+    Month %in% c(6, 7, 8)  ~ "Summer",
+    Month %in% c(9, 10, 11) ~ "Fall"
+  ))
+
 ```
 
+## Combined Dataset
+
+```{r}
+
+YSI_Combined <- bind_rows(YSI_2012_2015_6, YSI_2015_2025_6)
+
+write.csv(YSI_Combined, "Data/Processed/YSI_Combined.csv", row.names = FALSE)
+```
+
+
+## next steps - organize the nutrients data
+## YSI - average by month/ site
+## convert dates to month/ year format and merge with nutrient columns
+## create a season column
+## leave regular month column
 
