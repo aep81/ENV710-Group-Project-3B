@@ -208,6 +208,10 @@ Combined_Data_NArm <- data %>%
 
 #write.csv(Combined_Data_NArm, "Data/Processed/Combined_Data_NArm.csv", row.names = FALSE)
 
+
+Combined_Data_NArm %>%
+  count(Site) %>%
+  print()
 ```
 
 
