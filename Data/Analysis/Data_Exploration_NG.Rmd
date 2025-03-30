@@ -1,0 +1,109 @@
+---
+title: "Data_Exploration_NG"
+output: html_document
+date: "2025-03-30"
+---
+
+
+```{r}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(moments)
+library(readxl)
+library(lubridate)
+
+```
+
+
+```{r}
+
+na_data <- read.csv("Data/Processed/Combined_Data_NArm.csv")
+colnames(na_data)
+
+Combined_Data_NArm %>%
+  count(Site) %>%
+  print()
+
+```
+## Temperature
+
+Overall temperature data appears to be bimodally distributed. This is expected and confirmed to be due to seasonality (see the final seasons histogram). 
+```{r}
+
+
+temp_hist <- na_data %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist
+
+#severe outlier in temperature histogram - going to remove and remake data
+#ROW 793
+
+na_data <- na_data[-c(793),]
+
+temp_hist <- na_data %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist
+
+#bimodal plot, going to look at different seasons
+unique(na_data$Season)
+
+#Spring temperature histogram
+temp_hist_spr <- na_data %>% 
+  filter(Season == "Spring") %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist_spr
+
+#Summer temperature histogram
+temp_hist_sum <- na_data %>% 
+  filter(Season == "Summer") %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist_sum
+
+#Fall temperature histogram
+temp_hist_fall <- na_data %>% 
+  filter(Season == "Fall") %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist_fall 
+
+#Winter temperature histogram
+temp_hist_wint <- na_data %>% 
+  filter(Season == "Winter") %>% 
+  ggplot(aes(x = Temp_C))+
+  geom_histogram()
+temp_hist_wint 
+
+
+# Final Seasons Temperature Graph: 
+seasons_temp_hist <- na_data %>% 
+  ggplot(aes(x = Temp_C, fill = Season))+
+  geom_histogram(binwidth = 1, alpha = 0.5, position = "identity")
+seasons_temp_hist
+
+
+
+```
+
+
+## Specific Conductivity m/Sm
+
+```{r}
+
+na_data2 <- na_data[-c(1614),]
+
+SpC_hist <- na_data2 %>% 
+  ggplot(aes(x = SpCond_mScm))+
+  geom_histogram()
+SpC_hist
+
+
+
+```
+
+

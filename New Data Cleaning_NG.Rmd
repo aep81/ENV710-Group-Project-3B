@@ -212,13 +212,12 @@ Combined_Data_NArm <- data %>%
 Combined_Data_NArm %>%
   count(Site) %>%
   print()
+
+Combined_Data %>%
+  count(Site) %>%
+  print()
 ```
 
 
 
-## next steps - organize the nutrients data
-## YSI - average by month/ site
-## convert dates to month/ year format and merge with nutrient columns
-## create a season column
-## leave regular month column
 
