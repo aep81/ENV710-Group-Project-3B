@@ -1,0 +1,140 @@
+---
+title: "Ammonia Model"
+author: "Summer Heschong"
+date: "2025-03-31"
+output: pdf_document
+---
+# Setup 
+```{r setup}
+#load packages
+library(here)
+library(tidyverse)
+library(lme4)
+
+wetland <- read.csv(here('Data/Processed/Combined_Data_NArm.csv'))
+
+```
+
+# Research Question: What predicts ammonium levels in wetlands
+
+# Examine Data
+## display raw counts and distributions of data
+```{r histograms}
+#remove outliers: TDS 2262, row 1039; DO 224, row 840; TSS 516, row 641; fecal_coliform rows 1545 and 1549
+
+wetland <- wetland [-c(147, 166, 641, 793, 840, 1035, 1039, 1545, 1549, 1614),]
+
+#create histograms
+ggplot(wetland, aes(x = Temp_C)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = SpCond_mScm)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = Cond_mScm)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = TDS_mgl)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = Sal_ppt)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = DO_mgL)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = pH)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = TSS_mgL)) +
+geom_histogram(color = 'black')
+
+ggplot(wetland, aes(x = fecal_coliform_colonies_per100mL)) +
+geom_histogram(color = 'black')
+
+
+```
+
+## display relationships between predictor variables and outcome variable
+```{r scatter}
+#create scatterplots
+ggplot(wetland, aes(x = Temp_C, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = SpCond_mScm, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = TDS_mgl, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = Sal_ppt, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = DO_mgL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = pH, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = TSS_mgL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = fecal_coliform_colonies_per100mL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(wetland, aes(x = Unfiltered_TP_ugL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+```
+
+## everything needs to be log transformed?
+```{r log transform}
+#log transform everything
+log_wetland <- wetland %>%
+  mutate(across(c(Temp_C, SpCond_mScm, Cond_mScm, 
+                  TDS_mgl, Sal_ppt, DO_mgL, pH, 
+                  Filtered_NHx_ugL, TSS_mgL, 
+                  fecal_coliform_colonies_per100mL, Unfiltered_TP_ugL), 
+                ~ log(.+1)))
+
+#re-vistualize data
+
+ggplot(log_wetland, aes(x = Temp_C, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = SpCond_mScm, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = TDS_mgl, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = Sal_ppt, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = DO_mgL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = pH, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = TSS_mgL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = fecal_coliform_colonies_per100mL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+ggplot(log_wetland, aes(x = Unfiltered_TP_ugL, y = Filtered_NHx_ugL)) +
+geom_point()
+
+```
+
+## Are any variables correlated? 
+```{r correlation}
+
+
+
+
+
+```
+
+
