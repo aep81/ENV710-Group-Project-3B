@@ -18,62 +18,130 @@ library(lubridate)
 
 
 ```{r}
+here()
 
-na_data <- read.csv("Data/Processed/Combined_Data_NArm.csv")
+na_data <- read.csv(here('Data/Processed/Combined_Data_NArm.csv'))
 colnames(na_data)
 
-Combined_Data_NArm %>%
-  count(Site) %>%
-  print()
 
 ```
-## Temperature
 
-Overall temperature data appears to be bimodally distributed. This is expected and confirmed to be due to seasonality (see the final seasons histogram). 
 ```{r}
 
+na_data2 <- na_data %>%
+  mutate(across(where(is.numeric), 
+                ~ ifelse(abs(. - mean(., na.rm = TRUE)) > 3 * sd(., na.rm = TRUE), NA, .))) %>%
+  na.omit()
 
-temp_hist <- na_data %>% 
-  ggplot(aes(x = Temp_C))+
-  geom_histogram()
-temp_hist
+#create histograms
+ggplot(na_data2, aes(x = Temp_C)) +
+geom_histogram()
 
-#severe outlier in temperature histogram - going to remove and remake data
-#ROW 793
+ggplot(na_data2, aes(x = SpCond_mScm)) +
+geom_histogram()
 
-na_data <- na_data[-c(793),]
+ggplot(na_data2, aes(x = Cond_mScm)) +
+geom_histogram()
 
-temp_hist <- na_data %>% 
+ggplot(na_data2, aes(x = TDS_mgl)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = Sal_ppt)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = DO_mgL)) +
+geom_histogram()
+
+skewness(na_data2$DO_mgL)
+kurtosis(na_data2$DO_mgL)
+
+ggplot(na_data2, aes(x = pH)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = TSS_mgL)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = fecal_coliform_colonies_per100mL)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = Filtered_NOx_ugL)) +
+geom_histogram()
+
+##log transforming certain variables:
+## decided not to log transform DO, because the skewness and kurtosis values were approximately the same for either non/ transformed values
+
+log_na_rm <- na_data2 %>%
+  mutate(across(c(SpCond_mScm, Cond_mScm, 
+                  TDS_mgl, Sal_ppt, 
+                  Filtered_NOx_ugL, TSS_mgL, 
+                  fecal_coliform_colonies_per100mL, Unfiltered_TP_ugL), 
+                ~ log(.+1)))
+
+
+ggplot(log_na_rm, aes(x = SpCond_mScm)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = Cond_mScm)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = TDS_mgl)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = Sal_ppt)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = TSS_mgL)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = fecal_coliform_colonies_per100mL)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = Filtered_NOx_ugL)) +
+geom_histogram()
+
+```
+
+
+
+
+
+## Temperature
+
+Overall temperature data appears to be bimodally distributed. This is expected and confirmed to be due to seasonality (see the final seasons histogram). In models, because of the bimodal distribution (not able to be fixed with log transformation, we should probably use season as a categorical variable?)
+
+
+```{r}
+
+temp_hist <- log_na_rm %>% 
   ggplot(aes(x = Temp_C))+
   geom_histogram()
 temp_hist
 
 #bimodal plot, going to look at different seasons
-unique(na_data$Season)
 
 #Spring temperature histogram
-temp_hist_spr <- na_data %>% 
+temp_hist_spr <- log_na_rm %>% 
   filter(Season == "Spring") %>% 
   ggplot(aes(x = Temp_C))+
   geom_histogram()
 temp_hist_spr
 
 #Summer temperature histogram
-temp_hist_sum <- na_data %>% 
+temp_hist_sum <- log_na_rm %>% 
   filter(Season == "Summer") %>% 
   ggplot(aes(x = Temp_C))+
   geom_histogram()
 temp_hist_sum
 
 #Fall temperature histogram
-temp_hist_fall <- na_data %>% 
+temp_hist_fall <- log_na_rm %>% 
   filter(Season == "Fall") %>% 
   ggplot(aes(x = Temp_C))+
   geom_histogram()
 temp_hist_fall 
 
 #Winter temperature histogram
-temp_hist_wint <- na_data %>% 
+temp_hist_wint <- log_na_rm %>% 
   filter(Season == "Winter") %>% 
   ggplot(aes(x = Temp_C))+
   geom_histogram()
@@ -81,7 +149,7 @@ temp_hist_wint
 
 
 # Final Seasons Temperature Graph: 
-seasons_temp_hist <- na_data %>% 
+seasons_temp_hist <- log_na_rm %>% 
   ggplot(aes(x = Temp_C, fill = Season))+
   geom_histogram(binwidth = 1, alpha = 0.5, position = "identity")
 seasons_temp_hist
@@ -91,19 +159,5 @@ seasons_temp_hist
 ```
 
 
-## Specific Conductivity m/Sm
-
-```{r}
-
-na_data2 <- na_data[-c(1614),]
-
-SpC_hist <- na_data2 %>% 
-  ggplot(aes(x = SpCond_mScm))+
-  geom_histogram()
-SpC_hist
-
-
-
-```
 
 
