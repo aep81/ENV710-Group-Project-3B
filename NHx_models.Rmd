@@ -9,90 +9,102 @@ output: pdf_document
 #load packages
 library(here)
 library(tidyverse)
-library(lme4)
+library(nlme)
 
-wetland <- read.csv(here('Data/Processed/Combined_Data_NArm.csv'))
+wetlands <- read.csv(here('Data/Processed/Combined_Data_NArm.csv'))
 
 ```
 
-# Research Question: What predicts ammonium levels in wetlands
+# Step 1 - Research Question: What predicts ammonium levels in wetlands
 
-# Examine Data
-## display raw counts and distributions of data
+# Step 2 - Examine Data
+## Display raw counts and distributions of data
 ```{r histograms}
-#remove outliers: TDS 2262, row 1039; DO 224, row 840; TSS 516, row 641; fecal_coliform rows 1545 and 1549
 
-wetland <- wetland [-c(147, 166, 641, 793, 840, 1035, 1039, 1545, 1549, 1614),]
+#remove outliers using Nicole's code
+wetlands <- wetlands %>%
+  mutate(across(where(is.numeric), 
+                ~ ifelse(abs
+                         (. - mean
+                         (., na.rm = TRUE)) > 3 * sd
+                         (., na.rm = TRUE), NA, .)))
 
 #create histograms
-ggplot(wetland, aes(x = Temp_C)) +
+ggplot(wetlands, aes(x = Temp_C)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = SpCond_mScm)) +
+ggplot(wetlands, aes(x = SpCond_mScm)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = Cond_mScm)) +
+ggplot(wetlands, aes(x = Cond_mScm)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = TDS_mgl)) +
+ggplot(wetlands, aes(x = TDS_mgl)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = Sal_ppt)) +
+ggplot(wetlands, aes(x = Sal_ppt)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = DO_mgL)) +
+ggplot(wetlands, aes(x = DO_mgL)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = pH)) +
+ggplot(wetlands, aes(x = pH)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = TSS_mgL)) +
+ggplot(wetlands, aes(x = TSS_mgL)) +
 geom_histogram(color = 'black')
 
-ggplot(wetland, aes(x = fecal_coliform_colonies_per100mL)) +
+ggplot(wetlands, aes(x = fecal_coliform_colonies_per100mL)) +
 geom_histogram(color = 'black')
 
+ggplot(wetlands, aes(x = Unfiltered_TP_ugL)) +
+geom_histogram(color = 'black')
 
+ggplot(wetlands, aes(x = Site)) +
+geom_bar()
+
+ggplot(wetlands, aes(x = Season)) +
+geom_bar()
 ```
 
-## display relationships between predictor variables and outcome variable
+## Display relationships between predictor variables and outcome variable
 ```{r scatter}
 #create scatterplots
-ggplot(wetland, aes(x = Temp_C, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = Temp_C, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = SpCond_mScm, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = SpCond_mScm, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = TDS_mgl, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = TDS_mgl, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = Sal_ppt, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = Sal_ppt, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = DO_mgL, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = DO_mgL, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = pH, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = pH, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = TSS_mgL, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = TSS_mgL, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = fecal_coliform_colonies_per100mL, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = fecal_coliform_colonies_per100mL, y = Filtered_NHx_ugL)) +
 geom_point()
 
-ggplot(wetland, aes(x = Unfiltered_TP_ugL, y = Filtered_NHx_ugL)) +
+ggplot(wetlands, aes(x = Unfiltered_TP_ugL, y = Filtered_NHx_ugL)) +
 geom_point()
 
 ```
 
 ## everything needs to be log transformed?
 ```{r log transform}
-#log transform everything
-log_wetland <- wetland %>%
+#log transform everything except DO
+log_wetland <- wetlands %>%
   mutate(across(c(Temp_C, SpCond_mScm, Cond_mScm, 
-                  TDS_mgl, Sal_ppt, DO_mgL, pH, 
+                  TDS_mgl, Sal_ppt, pH, 
                   Filtered_NHx_ugL, TSS_mgL, 
                   fecal_coliform_colonies_per100mL, Unfiltered_TP_ugL), 
                 ~ log(.+1)))
@@ -128,13 +140,160 @@ geom_point()
 
 ```
 
-## Are any variables correlated? 
+## Display fixed effect variables across random effect variable
+```{r boxplot}
+#create boxplots of each fixed effect variable
+
+ggplot(log_wetland, aes(x = Site, y = Temp_C)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = SpCond_mScm)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = TDS_mgl)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = Sal_ppt)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = DO_mgL)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = pH)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = Unfiltered_TP_ugL)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = Filtered_NHx_ugL)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = TSS_mgL)) +
+geom_boxplot()
+
+ggplot(log_wetland, aes(x = Site, y = fecal_coliform_colonies_per100mL)) +
+geom_boxplot()
+```
+
+## Check for correlation between variables
 ```{r correlation}
 
+#Temp vs: 
+cor.test(log_wetland$Temp_C, log_wetland$SpCond_mScm)
+cor.test(log_wetland$Temp_C, log_wetland$TDS_mgl)
+cor.test(log_wetland$Temp_C, log_wetland$Sal_ppt)
+cor.test(log_wetland$Temp_C, log_wetland$DO_mgL)
+cor.test(log_wetland$Temp_C, log_wetland$pH)
+cor.test(log_wetland$Temp_C, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$Temp_C, log_wetland$TSS_mgL)
+cor.test(log_wetland$Temp_C, log_wetland$fecal_coliform_colonies_per100mL)
+
+#SpCond vs:
+cor.test(log_wetland$SpCond_mScm, log_wetland$TDS_mgl)
+cor.test(log_wetland$SpCond_mScm, log_wetland$Sal_ppt)
+cor.test(log_wetland$SpCond_mScm, log_wetland$DO_mgL)
+cor.test(log_wetland$SpCond_mScm, log_wetland$pH)
+cor.test(log_wetland$SpCond_mScm, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$SpCond_mScm, log_wetland$TSS_mgL)
+cor.test(log_wetland$SpCond_mScm, log_wetland$fecal_coliform_colonies_per100mL)
+
+#TDS vs:
+cor.test(log_wetland$TDS_mgl, log_wetland$Sal_ppt)
+cor.test(log_wetland$TDS_mgl, log_wetland$DO_mgL)
+cor.test(log_wetland$TDS_mgl, log_wetland$pH)
+cor.test(log_wetland$TDS_mgl, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$TDS_mgl, log_wetland$TSS_mgL)
+cor.test(log_wetland$TDS_mgl, log_wetland$fecal_coliform_colonies_per100mL)
+
+#Sal vs
+cor.test(log_wetland$Sal_ppt, log_wetland$DO_mgL)
+cor.test(log_wetland$Sal_ppt, log_wetland$pH)
+cor.test(log_wetland$Sal_ppt, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$Sal_ppt, log_wetland$TSS_mgL)
+cor.test(log_wetland$Sal_ppt, log_wetland$fecal_coliform_colonies_per100mL)
+
+#DO vs
+cor.test(log_wetland$DO_mgL, log_wetland$pH)
+cor.test(log_wetland$DO_mgL, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$DO_mgL, log_wetland$TSS_mgL)
+cor.test(log_wetland$DO_mgL, log_wetland$fecal_coliform_colonies_per100mL)
+#pH vs
+cor.test(log_wetland$pH, log_wetland$Unfiltered_TP_ugL)
+cor.test(log_wetland$pH, log_wetland$TSS_mgL)
+cor.test(log_wetland$pH, log_wetland$fecal_coliform_colonies_per100mL)
+#TP vs
+cor.test(log_wetland$Unfiltered_TP_ugL, log_wetland$TSS_mgL)
+cor.test(log_wetland$Unfiltered_TP_ugL, log_wetland$fecal_coliform_colonies_per100mL)
+
+#TSS vs
+cor.test(log_wetland$TSS_mgL, log_wetland$fecal_coliform_colonies_per100mL)
+
+#Predictor and Outcome Variable correlations 
+cor.test(log_wetland$Temp_C, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$SpCond_mScm, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$TDS_mgl, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$Sal_ppt, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$DO_mgL, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$pH, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$Unfiltered_TP_ugL, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$TSS_mgL, log_wetland$Filtered_NHx_ugL)
+cor.test(log_wetland$fecal_coliform_colonies_per100mL, log_wetland$Filtered_NHx_ugL)
 
 
+```
+SpCond and Sal are too correlated to use together - makes sense. Also all the predictor variables have very low correlations with the outcome variable :( 
 
+# Step 3 - Fit regular regression model
+I think I'm going to try three models.
+```{r generalized regression models}
+#first convert Season to a factor
+log_wetland$Season <- factor(log_wetland$Season, 
+                             levels = c('Winter', 'Spring', 'Summer', 'Fall'))
+# fit regression models
+mod1 <- lm(Filtered_NHx_ugL ~ Temp_C + pH + Season,
+            data = log_wetland)
 
+mod2 <- lm(Filtered_NHx_ugL ~ Temp_C + DO_mgL + Season,
+            data = log_wetland)
+
+mod3 <- lm(Filtered_NHx_ugL ~ Unfiltered_TP_ugL + DO_mgL + Temp_C + pH + Season,
+            data = log_wetland)
+
+#examine model outputs and residuals
+summary(mod1)
+plot(mod1)
+
+summary(mod2)
+plot(mod2)
+
+summary(mod3)
+plot(mod3)
+
+```
+
+# Step 4 - Fit Mixed Effects Model
+## use gls model first 
+```{r mixed}
+#remove NA's
+log_wetland <- na.omit(log_wetland)
+
+#first refit models using generalized least squares
+GLS1 <- gls(Filtered_NHx_ugL ~ Temp_C + pH + Season,
+            data = log_wetland)
+GLS2 <- gls(Filtered_NHx_ugL ~ Temp_C + DO_mgL + Season,
+            data = log_wetland)
+GLS3 <- gls(Filtered_NHx_ugL ~ Temp_C + DO_mgL + Unfiltered_TP_ugL + pH + Season,
+            data = log_wetland)
+
+#look at model outputs
+summary(GLS1)
+plot(GLS1)
+
+summary(GLS2)
+plot(GLS2)
+
+summary(GLS3)
+plot(GLS3)
 ```
 
 
