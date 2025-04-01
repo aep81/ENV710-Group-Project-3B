@@ -271,9 +271,9 @@ plot(mod3)
 
 ```
 
-# Step 4 - Fit Mixed Effects Model
+# Step 4 - Fit Mixed Effects Model and Examine Model Results
 ## use gls model first 
-```{r mixed}
+```{r gls}
 #remove NA's
 log_wetland <- na.omit(log_wetland)
 
@@ -295,5 +295,39 @@ plot(GLS2)
 summary(GLS3)
 plot(GLS3)
 ```
+Looking better than before yay
+
+##now fit to mixed effects model
+```{r mixed}
+#fit data to mixed effects models
+MEM1 <- lme(Filtered_NHx_ugL ~ Temp_C + pH + Season,
+            random = ~ 1|Site, data = log_wetland)
+MEM2 <- lme(Filtered_NHx_ugL ~ Temp_C + DO_mgL + Season,
+            random = ~ 1|Site, data = log_wetland)
+MEM3 <- lme(Filtered_NHx_ugL ~ Temp_C + DO_mgL + Unfiltered_TP_ugL + pH + Season,
+            random = ~ 1|Site, data = log_wetland)
+
+#Compare AIC values between gls and lme models
+AIC(GLS1, MEM1)
+AIC(GLS2, MEM2)
+AIC(GLS3, MEM3)
+
+#Examine models residual plots
+plot(MEM1)
+qqnorm(MEM1)
+
+plot(MEM2)
+qqnorm(MEM2)
+
+plot(MEM3)
+qqnorm(MEM3)
+
+#Examine results
+summary(MEM1)
+summary(MEM2)
+summary(MEM3)
+
+```
+The mixed effect models have lower AIC values than the gls linear regression models
 
 
