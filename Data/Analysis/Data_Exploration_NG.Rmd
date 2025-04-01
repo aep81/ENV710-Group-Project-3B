@@ -55,6 +55,9 @@ geom_histogram()
 skewness(na_data2$DO_mgL)
 kurtosis(na_data2$DO_mgL)
 
+ggplot(na_data2, aes(x = DO_percent)) +
+geom_histogram()
+
 ggplot(na_data2, aes(x = pH)) +
 geom_histogram()
 
@@ -67,14 +70,20 @@ geom_histogram()
 ggplot(na_data2, aes(x = Filtered_NOx_ugL)) +
 geom_histogram()
 
+ggplot(na_data2, aes(x = Filtered_NHx_ugL)) +
+geom_histogram()
+
+ggplot(na_data2, aes(x = Unfiltered_TN_ugL)) +
+geom_histogram()
+
 ##log transforming certain variables:
 ## decided not to log transform DO, because the skewness and kurtosis values were approximately the same for either non/ transformed values
 
 log_na_rm <- na_data2 %>%
   mutate(across(c(SpCond_mScm, Cond_mScm, 
                   TDS_mgl, Sal_ppt, 
-                  Filtered_NOx_ugL, TSS_mgL, 
-                  fecal_coliform_colonies_per100mL, Unfiltered_TP_ugL), 
+                  Filtered_NOx_ugL, TSS_mgL, Filtered_NHx_ugL, 
+                  fecal_coliform_colonies_per100mL, Unfiltered_TN_ugL), 
                 ~ log(.+1)))
 
 
@@ -99,6 +108,11 @@ geom_histogram()
 ggplot(log_na_rm, aes(x = Filtered_NOx_ugL)) +
 geom_histogram()
 
+ggplot(log_na_rm, aes(x = Filtered_NHx_ugL)) +
+geom_histogram()
+
+ggplot(log_na_rm, aes(x = Unfiltered_TN_ugL)) +
+geom_histogram()
 ```
 
 
