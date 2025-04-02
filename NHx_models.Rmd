@@ -103,11 +103,25 @@ geom_point()
 ```{r log transform}
 #log transform everything except DO
 log_wetland <- wetlands %>%
-  mutate(across(c(Temp_C, SpCond_mScm, Cond_mScm, 
-                  TDS_mgl, Sal_ppt, pH, 
+  mutate(across(c(SpCond_mScm, Cond_mScm, 
+                  TDS_mgl, Sal_ppt, 
                   Filtered_NHx_ugL, TSS_mgL, 
-                  fecal_coliform_colonies_per100mL, Unfiltered_TP_ugL), 
+                  Unfiltered_TP_ugL, Filtered_NOx_ugL,
+                  Unfiltered_TN_ugL), 
                 ~ log(.+1)))
+#change column names
+log_transformed <- log_wetland %>% 
+  rename(Log_SpCond_mScm = SpCond_mScm, 
+         Log_Cond_mScm = Cond_mScm, 
+         Log_TDS_mgl = TDS_mgl ,   
+         Log_Sal_ppt = Sal_ppt, 
+         Log_Unfiltered_TN_ugL = Unfiltered_TN_ugL,
+         Log_Filtered_NOx_ugL = Filtered_NOx_ugL,
+         Log_Filtered_NHx_ugL = Filtered_NHx_ugL,
+         Log_Unfiltered_TP_ugL = Unfiltered_TP_ugL,
+         Log_TSS_mgL = TSS_mgL)
+
+#write.csv(log_transformed, "Data/Processed/Log_Transformed_Data.csv", row.names = FALSE)
 
 #re-vistualize data
 
