@@ -1,0 +1,55 @@
+---
+title: "TotalN_Models"
+author: "Aidan Power"
+date: "2025-04-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Packages and Import Dataset
+
+```{r Load Packages}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(moments)
+library(readxl)
+library(lubridate)
+
+```
+
+```{r Import Daraset}
+
+Combined_Data <- read.csv("Data/Processed/Combined_Data.csv")
+
+YSI_Combined <- read.csv("Data/Processed/YSI_Combined.csv")
+
+NA_Combined <- read.csv("Data/Processed/Combined_Data_NArm.csv")
+
+Log_Combined <- read.csv("Data/Processed/Log_Transformed_Data.csv")
+
+```
+
+Predictor variables: Temperature, Specific Conductivity, Conductivity, TDS, Salinity, DO, pH, season, TSS
+
+#Data Interpretation
+
+```{r Raw Distributions}
+
+ggplot(NA_Combined, aes(x = Temp_C)) +
+geom_histogram()
+
+
+
+
+
+
+
+
+
+```
+
