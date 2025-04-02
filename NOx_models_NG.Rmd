@@ -1,0 +1,122 @@
+---
+title: "NOx_models_NG"
+output: pdf_document
+date: "2025-04-02"
+---
+
+
+## Libraries and Data Loading
+
+```{r}
+
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(moments)
+library(readxl)
+library(lubridate)
+
+
+wetlands <- read.csv(here('Data/Processed/Log_Transformed_Data.csv'))
+
+glimpse(wetlands)
+colnames(wetlands)
+
+```
+
+
+## Data Exploration: Continuous Variables
+
+```{r}
+
+
+ggplot(wetlands, aes(x = Log_SpCond_mScm)) +
+geom_histogram()
+
+skewness(wetlands$Log_SpCond_mScm, na.rm = T)
+kurtosis(wetlands$Log_SpCond_mScm, na.rm = T)
+
+ggplot(wetlands, aes(x = Log_Cond_mScm)) +
+geom_histogram()
+
+skewness(wetlands$Log_Cond_mScm, na.rm = T)
+kurtosis(wetlands$Log_Cond_mScm, na.rm = T)
+
+ggplot(wetlands, aes(x = Log_TDS_mgl)) +
+geom_histogram()
+
+skewness(wetlands$Log_TDS_mgl, na.rm = T)
+kurtosis(wetlands$Log_TDS_mgl, na.rm = T)
+
+ggplot(wetlands, aes(x = Log_Sal_ppt)) +
+geom_histogram()
+
+skewness(wetlands$Log_Sal_ppt, na.rm = T)
+kurtosis(wetlands$Log_Sal_ppt, na.rm = T)
+
+ggplot(wetlands, aes(x = DO_percent)) +
+geom_histogram()
+
+skewness(wetlands$DO_percent, na.rm = T)
+kurtosis(wetlands$DO_percent, na.rm = T)
+
+ggplot(wetlands, aes(x = DO_mgL)) +
+geom_histogram()
+
+skewness(wetlands$DO_mgL, na.rm = T)
+kurtosis(wetlands$DO_mgL, na.rm = T)
+
+ggplot(wetlands, aes(x = pH)) +
+geom_histogram()
+
+skewness(wetlands$pH, na.rm = T)
+kurtosis(wetlands$pH, na.rm = T)
+
+ggplot(wetlands, aes(x = Log_TSS_mgL)) +
+geom_histogram()
+
+skewness(wetlands$Log_TSS_mgL, na.rm = T)
+kurtosis(wetlands$Log_TSS_mgL, na.rm = T)
+
+ggplot(wetlands, aes(x = fecal_coliform_colonies_per100mL)) +
+geom_histogram()
+
+skewness(wetlands$fecal_coliform_colonies_per100mL, na.rm = T)
+kurtosis(wetlands$fecal_coliform_colonies_per100mL, na.rm = T)
+
+ggplot(wetlands, aes(x = Log_Filtered_NOx_ugL)) +
+geom_histogram()
+
+skewness(wetlands$Log_Filtered_NOx_ugL, na.rm = T)
+kurtosis(wetlands$Log_Filtered_NOx_ugL, na.rm = T)
+
+
+
+```
+
+
+From the histogram plots, and skewness and kurtosis values, the variables that are normally distributed enough for analysis are DO%, DO (mg/L), pH, and log(TSS). Assessments of categorical variables will follow: 
+
+
+## Data Exploration: Categorical Variables
+
+```{r}
+
+unique(wetlands$Site)
+
+ggplot(wetlands, aes(Site))+
+  geom_bar()
+
+ggplot(wetlands, aes(Month))+
+  geom_bar()
+
+ggplot(wetlands, aes(Year))+
+  geom_bar()
+
+ggplot(wetlands, aes(Season))+
+  geom_bar()
+
+
+```
+
