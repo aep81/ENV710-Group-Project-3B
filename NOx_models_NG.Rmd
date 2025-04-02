@@ -118,5 +118,53 @@ ggplot(wetlands, aes(Season))+
   geom_bar()
 
 
+##filter out first and last years
+##filter out AN3/ AS/ SP/TV/ UP
+
+wetlands2 <- wetlands %>% 
+  filter(!(Year  %in% c(2015, 2025))) %>% 
+  filter(!(Site %in% c("AN3", "AS", "SP", "TV", "UP", "DP")))
+
+ggplot(wetlands2, aes(Site))+
+  geom_bar()
+
+ggplot(wetlands2, aes(Year))+
+  geom_bar()
+
+
 ```
+
+
+
+## NEED TO do correlations first!!
+
+## Linear Models
+
+```{r}
+
+wetlandsO2_perc.lm <- (Log_Filtered_NOx_ugL ~ DO_percent + pH + Log_TSS_mgl + Season)
+  
+wetlandsO2_mgL.lm <- 
+
+
+```
+
+
+
+Notes: 
+
+Continuous Variables: 
+- DO% / DO mg_L/ pH / LogTSS
+Categorical Variables:
+- Site/ month/ Year/ season
+
+Look at
+- DO% vs DO mg/L
+- season v month v year
+- combinations of season + year/ month + year
+
+Random Effects
+- site
+- year
+- potentially site nested in year
 
