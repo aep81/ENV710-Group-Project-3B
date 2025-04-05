@@ -189,3 +189,54 @@ geom_point()
 
 ```
 
+```{r Cor Tests}
+#Temp
+cor.test(Log_Combined$Temp_C,Log_Combined$Log_SpCond_mScm) #-0.226
+cor.test(Log_Combined$Temp_C,Log_Combined$Log_Cond_mScm) #0.015
+cor.test #To be continued
+
+#Spec Cond
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$Log_Cond_mScm) #0.94 !!!
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$Log_TDS_mgl) #0.326
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$Log_Sal_ppt) #0.969 !!!
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$DO_mgL) #0.335
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$pH) #0.161
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$Season) #Must be numeric
+cor.test(Log_Combined$Log_SpCond_mScm,Log_Combined$Log_TSS_mgL)#-0.406
+
+#Conductivity
+cor.test(Log_Combined$Log_Cond_mScm,Log_Combined$Log_TDS_mgl) #0.316
+cor.test(Log_Combined$Log_Cond_mScm,Log_Combined$Log_Sal_ppt) #0.934 !!!
+cor.test(Log_Combined$Log_Cond_mScm,Log_Combined$DO_mgL) #0.198
+cor.test(Log_Combined$Log_Cond_mScm,Log_Combined$pH) #0.195
+cor.test(Log_Combined$Log_Cond_mScm,Log_Combined$Log_TSS_mgL) #-0.383
+
+#TDS
+cor.test(Log_Combined$Log_TDS_mgl,Log_Combined$Log_Sal_ppt) #0.331
+cor.test(Log_Combined$Log_TDS_mgl,Log_Combined$DO_mgL) #0.142
+cor.test(Log_Combined$Log_TDS_mgl,Log_Combined$pH) #0.068
+cor.test(Log_Combined$Log_TDS_mgl,Log_Combined$Log_TSS_mgL) #-0.150
+
+#Salinity
+cor.test(Log_Combined$Log_Sal_ppt,Log_Combined$DO_mgL) #0.323
+cor.test(Log_Combined$Log_Sal_ppt,Log_Combined$pH) #0.167
+cor.test(Log_Combined$Log_Sal_ppt,Log_Combined$Log_TSS_mgL) #-0.417
+
+#DO
+cor.test(Log_Combined$DO_mgL,Log_Combined$pH) #0.095
+cor.test(Log_Combined$DO_mgL,Log_Combined$Log_TSS_mgL) #-0.292
+
+#pH
+cor.test(Log_Combined$pH,Log_Combined$Log_TSS_mgL) #-0.131
+
+
+
+
+
+
+
+
+
+```
+
+
