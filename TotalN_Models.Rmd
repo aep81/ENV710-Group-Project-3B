@@ -36,6 +36,29 @@ Log_Combined <- read.csv("Data/Processed/Log_Transformed_Data.csv")
 
 Predictor variables: Temperature, Specific Conductivity, Conductivity, TDS, Salinity, DO, pH, season, TSS
 
+#Outliers
+
+```{r Remove Outliers}
+
+NA_Combined <- NA_Combined %>%
+  mutate(across(where(is.numeric), 
+                ~ ifelse(abs
+                         (. - mean
+                         (., na.rm = TRUE)) > 3 * sd
+                         (., na.rm = TRUE), NA, .)))
+
+Log_Combined <- Log_Combined %>%
+  mutate(across(where(is.numeric), 
+                ~ ifelse(abs
+                         (. - mean
+                         (., na.rm = TRUE)) > 3 * sd
+                         (., na.rm = TRUE), NA, .))) 
+
+
+```
+
+
+
 #Data Interpretation
 
 ```{r Raw Distributions}
