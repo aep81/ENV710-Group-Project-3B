@@ -64,9 +64,69 @@ Log_Combined <- Log_Combined %>%
 ```{r Raw Distributions}
 
 ggplot(NA_Combined, aes(x = Temp_C)) +
+geom_histogram() #Are we showing the histograms? Do we need Rice's rule?
+#Bimodal
+
+ggplot(Log_Combined, aes(x = log10(Temp_C))) +
+geom_histogram()
+#Negatively skewed, I am against using this
+
+
+#Specific Conductivity
+ggplot(NA_Combined, aes(x = SpCond_mScm)) +
+geom_histogram() 
+
+skewness(NA_Combined$SpCond_mScm)
+kurtosis(NA_Combined$SpCond_mScm) #These both show NA, going to try log transforming
+
+ggplot(Log_Combined, aes(x = Log_SpCond_mScm)) +
 geom_histogram()
 
+skewness(Log_Combined$Log_SpCond_mScm) #Still returning NA
 
+
+#Conductivity
+ggplot(NA_Combined, aes(x = Cond_mScm)) +
+geom_histogram() #Positively skewed
+
+ggplot(Log_Combined, aes(x = Log_Cond_mScm)) +
+geom_histogram()
+
+#TDS
+ggplot(NA_Combined, aes(x = TDS_mgl)) +
+geom_histogram() 
+
+ggplot(Log_Combined, aes(x = Log_TDS_mgl)) +
+geom_histogram() #Maybe we do not log transform this one, but I will use what yall use
+
+#Salinity
+ggplot(NA_Combined, aes(x = Sal_ppt)) +
+geom_histogram() 
+
+ggplot(Log_Combined, aes(x = Log_Sal_ppt)) +
+geom_histogram() #Almost seems better, but I'll check with yall
+
+#DO
+ggplot(NA_Combined, aes(x = DO_mgL)) +
+geom_histogram() 
+
+ggplot(Log_Combined, aes(x = log10(DO_mgL))) +
+geom_histogram() #Ok definitely using normal one
+
+#pH
+ggplot(NA_Combined, aes(x = pH)) +
+geom_histogram() #Beautiful
+
+#Season (Thank you Nicole)
+ggplot(NA_Combined, aes(x = Season)) +
+geom_histogram(stat="count") 
+
+#TSS
+ggplot(NA_Combined, aes(x = TSS_mgL)) +
+geom_histogram() #Positively skewed
+
+ggplot(Log_Combined, aes(x = Log_TSS_mgL)) +
+geom_histogram() #Yay
 
 
 
