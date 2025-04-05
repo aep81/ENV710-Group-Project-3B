@@ -128,6 +128,59 @@ geom_histogram() #Positively skewed
 ggplot(Log_Combined, aes(x = Log_TSS_mgL)) +
 geom_histogram() #Yay
 
+#Total N
+ggplot(NA_Combined, aes(x = Unfiltered_TN_ugL)) +
+geom_histogram() 
+
+ggplot(Log_Combined, aes(x = Log_Unfiltered_TN_ugL)) +
+geom_histogram()
+
+
+
+
+
+
+```
+
+#Correlations
+
+```{r Relationships}
+
+#Temp
+ggplot(Log_Combined, aes(x = Temp_C, y = Log_Unfiltered_TN_ugL)) +
+geom_point()
+
+#Specific Conductivity
+ggplot(Log_Combined, aes(x = Log_SpCond_mScm, y = Log_Unfiltered_TN_ugL)) +
+geom_point()
+
+#Conductivity
+ggplot(Log_Combined, aes(x = Log_Cond_mScm, y = Log_Unfiltered_TN_ugL)) +
+geom_point()
+
+#TDS
+ggplot(Log_Combined, aes(x = Log_TDS_mgl, y = Log_Unfiltered_TN_ugL)) +
+geom_point() #I don't like this one
+
+#Salinity
+ggplot(Log_Combined, aes(x = Log_Sal_ppt, y = Log_Unfiltered_TN_ugL)) +
+geom_point() #I don't think salinity is continuous
+
+#DO
+ggplot(Log_Combined, aes(x = DO_mgL, y = Log_Unfiltered_TN_ugL)) +
+geom_point() 
+
+#pH
+ggplot(Log_Combined, aes(x = pH, y = Log_Unfiltered_TN_ugL)) +
+geom_point() 
+
+#Season
+ggplot(Log_Combined, aes(x = Season, y = Log_Unfiltered_TN_ugL)) +
+geom_point() 
+
+#TSS
+ggplot(Log_Combined, aes(x = Log_TSS_mgL, y = Log_Unfiltered_TN_ugL)) +
+geom_point() 
 
 
 
