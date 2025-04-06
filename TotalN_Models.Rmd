@@ -19,6 +19,7 @@ library(ggplot2)
 library(moments)
 library(readxl)
 library(lubridate)
+library(nlme)
 
 ```
 
@@ -256,6 +257,34 @@ summary(Model2)
 summary(Model3)
 
 AIC(Model1,Model2,Model3)
+
+plot(Model1)
+plot(Model2)
+plot(Model3)
+
+```
+
+#GLS Model
+
+```{r GLS}
+
+#Removing NAs
+Log_Combined <- na.omit(Log_Combined)
+
+#Run GLS
+GLS1 <- gls(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+GLS2 <- gls(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+GLS3 <- gls(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+
+#Model Summary
+summary(GLS1)
+summary(GLS2)
+summary(GLS3)
+
+#Residual Plots
+plot(GLS1)
+plot(GLS2)
+plot(GLS3)
 
 ```
 
