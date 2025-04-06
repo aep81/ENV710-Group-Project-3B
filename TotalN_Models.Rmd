@@ -238,5 +238,25 @@ cor.test(Log_Combined$pH,Log_Combined$Log_TSS_mgL) #-0.131
 
 
 ```
+#First Models
+
+```{r Linear Models}
+#Converting season to factor
+Log_Combined$Season <- factor(Log_Combined$Season, 
+                             levels = c('Winter', 'Spring', 'Summer', 'Fall'))
+
+Model1 <- lm(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+
+Model2 <- lm(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+
+Model3 <- lm(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+
+summary(Model1)
+summary(Model2)
+summary(Model3)
+
+AIC(Model1,Model2,Model3)
+
+```
 
 
