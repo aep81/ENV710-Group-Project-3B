@@ -287,5 +287,37 @@ plot(GLS2)
 plot(GLS3)
 
 ```
+#Mixed Effects Model
+```{r Mixed Effects}
+
+MEM1 <- lme(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL, random=~1|Site, data = Log_Combined)
+MEM2 <- lme(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,random=~1|Site, data = Log_Combined)
+MEM3 <- lme(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,random=~1|Site, data = Log_Combined)
+
+#Compare gls and lme AIC values
+AIC(GLS1, MEM1)
+AIC(GLS2, MEM2)
+AIC(GLS3, MEM3)
+
+#Examine results
+summary(MEM1)
+summary(MEM2)
+summary(MEM3)
+
+#Examine residuals
+plot(MEM1)
+qqnorm(MEM1)
+
+plot(MEM2)
+qqnorm(MEM2)
+
+plot(MEM3)
+qqnorm(MEM3)
+
+
+
+```
+
+
 
 
