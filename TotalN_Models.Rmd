@@ -318,6 +318,26 @@ qqnorm(MEM3)
 
 ```
 
+#Making Plot
+
+```{r Plot}
+
+#Report using visualization
+
+fig1 <- ggplot(Log_Combined, aes(x=Log_Cond_mScm, y=Log_Unfiltered_TN_ugL))+
+  geom_boxplot(width=0.2) +
+  geom_jitter(aes(color=Site), size=3, width = 0.10) +
+  scale_color_manual(values=c("#FAEBD7","#458B74","#E0EEEE","#0000FF","#FF4040","#EEC591","#7AC5CD","#458B00","#D2691E","#FF7256","#EEE8CD","#00CDCD","#8B6508","#556B2F","#FF7F00","#B23AEE", "#9BCD9B","#528B8B","#FF1493","#00BFFF")) +
+  labs(x="Conductivity(mS/cm)",y="Total Unfiltered Nitrogen (ug/L)") +
+  theme_bw()
+
+fig1
+
+#Try different color scheme
+#Try less sites
+
+
+```
 
 
 
