@@ -338,6 +338,23 @@ fig1
 
 
 ```
+```{r Plot}
 
+#Report using visualization
+
+fig1 <- ggplot(Log_Combined, aes(x=Log_Cond_mScm, y=Log_Unfiltered_TN_ugL))+
+  geom_boxplot(width=0.2) +
+  geom_jitter(aes(color=Site), size=3, width = 0.10) +
+  scale_color_manual(values=c("#D2691E","#D2691E","#D2691E","#D2691E","#FAEBD7","#458B74","#0000FF","#0000FF","#0000FF","#FF7256","#FF4040","#00CDCD","#00CDCD","#556B2F","#FF7F00","#B23AEE", "#FF1493","#FF1493","#FF1493","#FF1493")) +
+  labs(x="Conductivity(mS/cm)",y="Total Unfiltered Nitrogen (ug/L)") +
+  theme_bw()
+
+fig1
+
+#Try different color scheme
+#Try less sites
+
+
+```
 
 
