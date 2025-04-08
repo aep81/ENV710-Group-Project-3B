@@ -342,17 +342,31 @@ fig1
 
 #Report using visualization
 
-fig1 <- ggplot(Log_Combined, aes(x=Log_Cond_mScm, y=Log_Unfiltered_TN_ugL))+
+fig1 <- ggplot(Log_combined, aes(x=Log_Cond_mScm, y=Log_Unfiltered_TN_ugL))+
   geom_boxplot(width=0.2) +
-  geom_jitter(aes(color=Site), size=3, width = 0.10) +
-  scale_color_manual(values=c("#D2691E","#D2691E","#D2691E","#D2691E","#FAEBD7","#458B74","#0000FF","#0000FF","#0000FF","#FF7256","#FF4040","#00CDCD","#00CDCD","#556B2F","#FF7F00","#B23AEE", "#FF1493","#FF1493","#FF1493","#FF1493")) +
+  geom_jitter(aes(color=Group_Level), size=3, width = 0.10) +
+  scale_color_manual(values=c("#D2691E","#FAEBD7","#458B74","#0000FF","#FF7256","#FF4040","#00CDCD","#556B2F","#FF1493","#00BFFF")) +
   labs(x="Conductivity(mS/cm)",y="Total Unfiltered Nitrogen (ug/L)") +
   theme_bw()
 
+#Factor: Levels in certain order
 fig1
+
+Log_combined <- Log_Combined %>%
+  mutate(Group_Level = case_when(Site %in% c("AN0", "AN2","AN3","AN4","AN5") ~ "AN",
+                                 Site %in% c("AS") ~ "AS",
+                                 Site %in% c("CP1", "CP2","CP3") ~ "CP",
+                                 Site %in% c("DP") ~ "DP",
+                                 Site %in% c("P3D") ~ "P3",
+                                 Site %in% c("P51","P53") ~ "P5",
+                                 Site %in% c("SP") ~ "SP",
+                                 Site %in% c("TV") ~ "TV",
+                                 Site %in% c("UP") ~ "UP",
+                                 Site %in% c("WT1","WT3","WT4","WT5") ~ "WT"))
 
 #Try different color scheme
 #Try less sites
+#Mutate, new column, case_when, assign group names
 
 
 ```
