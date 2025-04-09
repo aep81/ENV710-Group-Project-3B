@@ -19,6 +19,7 @@ library(lubridate)
 library(lme4)
 library(nlme)
 library(gtsummary)
+library(cowplot)
 
 
 wetlands <- read.csv(here('Data/Processed/Log_Transformed_Data.csv'))
@@ -356,18 +357,42 @@ Best model: mixed effects model with site nested in year. Interesting because in
 #predicted vs observed plots
 
 wetlands$predicted_nox <- predict(nox.lmm3)
-ggplot(wetlands, aes(x = predicted_nox, y = Log_Filtered_NOx_ugL)) +
+
+pred_obs_NOx <- ggplot(wetlands, aes(x = Log_Filtered_NOx_ugL, y = predicted_nox)) +
   geom_point(alpha = 0.4) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-  theme_minimal() +
+  theme_bw() +
   labs(title = "Predicted vs Observed NOₓ",
-       x = "Predicted Log(NOₓ µg/L)",
-       y = "Observed Log(NOₓ µg/L)")
+       x = "Observed Log(NOₓ µg/L)",
+       y = "Predicted Log(NOₓ µg/L)") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
+pred_obs_NOx
 
 #Residuals plot
+residuals <- resid(nox.lmm3)
+fitted <- fitted(nox.lmm3)
 
+res_df <- data.frame(
+  Fitted = fitted,
+  Residuals = residuals
+)
 
+residvfit <- ggplot(res_df, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  theme_bw() +
+  labs(title = "Residuals vs. Fitted",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
 
+NOx_diagnostics <- plot_grid(pred_obs_NOx, residvfit, labels = c("A", "B"), ncol = 2, align = "h")
+
+ggsave("NOx_diagnostics.png", NOx_diagnostics, width = 12, height = 6, dpi = 300)
 ```
 
 
