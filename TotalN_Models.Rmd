@@ -20,6 +20,9 @@ library(moments)
 library(readxl)
 library(lubridate)
 library(nlme)
+install.packages("cowplot")
+library(cowplot)
+library(gtsummary)
 
 ```
 
@@ -246,11 +249,11 @@ cor.test(Log_Combined$pH,Log_Combined$Log_TSS_mgL) #-0.131
 Log_Combined$Season <- factor(Log_Combined$Season, 
                              levels = c('Winter', 'Spring', 'Summer', 'Fall'))
 
-Model1 <- lm(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+Model1 <- lm(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site,data = Log_Combined)
 
-Model2 <- lm(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+Model2 <- lm(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site,data = Log_Combined)
 
-Model3 <- lm(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+Model3 <- lm(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site,data = Log_Combined)
 
 summary(Model1)
 summary(Model2)
@@ -272,9 +275,9 @@ plot(Model3)
 Log_Combined <- na.omit(Log_Combined)
 
 #Run GLS
-GLS1 <- gls(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
-GLS2 <- gls(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
-GLS3 <- gls(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,data = Log_Combined)
+GLS1 <- gls(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site+Year,data = Log_Combined)
+GLS2 <- gls(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site+Year,data = Log_Combined)
+GLS3 <- gls(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+Season+Log_TSS_mgL+Site+Year,data = Log_Combined)
 
 #Model Summary
 summary(GLS1)
@@ -290,9 +293,9 @@ plot(GLS3)
 #Mixed Effects Model
 ```{r Mixed Effects}
 
-MEM1 <- lme(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL, random=~1|Site, data = Log_Combined)
-MEM2 <- lme(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,random=~1|Site, data = Log_Combined)
-MEM3 <- lme(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+DO_mgL+pH+Season+Log_TSS_mgL,random=~1|Site, data = Log_Combined)
+MEM1 <- lme(Log_Unfiltered_TN_ugL ~ Log_SpCond_mScm+Log_TDS_mgl+Season+Log_TSS_mgL, random=~1|Site/Year, data = Log_Combined)
+MEM2 <- lme(Log_Unfiltered_TN_ugL ~ Log_Cond_mScm+Log_TDS_mgl+Season+Log_TSS_mgL,random=~1|Site/Year, data = Log_Combined)
+MEM3 <- lme(Log_Unfiltered_TN_ugL ~ Log_Sal_ppt+Log_TDS_mgl+pH+Season+Log_TSS_mgL,random=~1|Site/Year, data = Log_Combined)
 
 #Compare gls and lme AIC values
 AIC(GLS1, MEM1)
@@ -368,7 +371,60 @@ Log_combined <- Log_Combined %>%
 #Try less sites
 #Mutate, new column, case_when, assign group names
 
+ggsave(fig1, filename = "figcond.jpg",
+       height = 12,
+       width =15,
+       units="cm")
+
 
 ```
 
+```{r}
 
+#predicted vs observed plots
+
+Log_Combined$predicted_TotN <- predict(MEM2)
+
+pred_obs_TotN <- ggplot(Log_Combined, aes(x = Log_Unfiltered_TN_ugL, y = predicted_TotN)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  theme_bw() +
+  labs(title = "Predicted vs Observed Total Nitrogen",
+       x = "Observed Log(N µg/L)",
+       y = "Predicted Log(N µg/L)") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
+pred_obs_TotN
+
+colnames(Log_Combined)
+
+#Residuals plot
+residuals <- resid(MEM2)
+fitted <- fitted(MEM2)
+
+res_df <- data.frame(
+  Fitted = fitted,
+  Residuals = residuals
+)
+
+residvfit <- ggplot(res_df, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  theme_bw() +
+  labs(title = "Residuals vs. Fitted",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
+
+N_diagnostics <- plot_grid(pred_obs_TotN, residvfit, labels = c("A", "B"), ncol = 2, align = "h")
+
+N_diagnostics
+
+ggsave("TotalN_diagnostics.jpeg", N_diagnostics, width = 12, height = 6, dpi = 300)
+
+tbl_regression(MEM2)
+tbl_regression(MEM2, tidy_fun = broom.helpers::tidy_parameters)
+```
