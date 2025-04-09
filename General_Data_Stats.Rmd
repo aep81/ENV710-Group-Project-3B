@@ -32,6 +32,9 @@ wetlands <- na.omit(wetlands)
 summary(wetlands)
 
 
+sapply(wetlands[sapply(wetlands, is.numeric)], sd)
+sapply(wetlands[sapply(wetlands, is.numeric)], var)
+
 ```
 
 
