@@ -193,30 +193,6 @@ O2_site_plot
 ```
 
 
-# potential further filtering of data ?
-
-removal of sites and years with the lowest number of observations, probably should only use if we are going to do nested linear reg? 
-decided to not do/ can write in future directions maybe
-
-```{r}
-
-##filter out first and last years
-##filter out AN3/ AS/ SP/TV/ UP
-
-#wetlands2 <- wetlands %>% 
- # filter(!(Year  %in% c(2015, 2025))) %>% 
- # filter(!(Site %in% c("AN3", "AS", "SP", "TV", "UP", "DP")))
-
-#ggplot(wetlands2, aes(Site))+
- # geom_bar()
-
-#ggplot(wetlands2, aes(Year))+
- # geom_bar()
-
-```
-
-
-
 # Linear Models
 
 
@@ -316,10 +292,7 @@ plot(nox.lmm3)
 qqnorm(nox.lmm3)
 summary(nox.lmm3)
 AIC(nox.lmm3)
-coef(nox.lmm3)
 tbl_regression(nox.lmm3)
-tbl_regression(nox.lmm3, tidy_fun = broom.helpers::tidy_parameters)
-
 
 AIC(nox.lmm1, nox.lmm2, nox.lmm3)
 
@@ -393,6 +366,8 @@ residvfit <- ggplot(res_df, aes(x = Fitted, y = Residuals)) +
 NOx_diagnostics <- plot_grid(pred_obs_NOx, residvfit, labels = c("A", "B"), ncol = 2, align = "h")
 
 ggsave("NOx_diagnostics.png", NOx_diagnostics, width = 12, height = 6, dpi = 300)
+
+
 ```
 
 
