@@ -5,7 +5,7 @@ date: "2025-04-02"
 ---
 
 
-## Libraries and Data Loading
+# Libraries and Data Loading
 
 ```{r}
 
@@ -16,9 +16,14 @@ library(ggplot2)
 library(moments)
 library(readxl)
 library(lubridate)
+library(lme4)
+library(nlme)
+library(gtsummary)
 
 
 wetlands <- read.csv(here('Data/Processed/Log_Transformed_Data.csv'))
+
+wetlands <- na.omit(wetlands)
 
 glimpse(wetlands)
 colnames(wetlands)
@@ -26,10 +31,9 @@ colnames(wetlands)
 ```
 
 
-## Data Exploration: Continuous Variables
+# Data Exploration: Continuous Variables Histograms
 
 ```{r}
-
 
 ggplot(wetlands, aes(x = Log_SpCond_mScm)) +
 geom_histogram()
@@ -99,7 +103,7 @@ kurtosis(wetlands$Log_Filtered_NOx_ugL, na.rm = T)
 From the histogram plots, and skewness and kurtosis values, the variables that are normally distributed enough for analysis are DO%, DO (mg/L), pH, and log(TSS). Assessments of categorical variables will follow: 
 
 
-## Data Exploration: Categorical Variables
+# Data Exploration: Categorical Variables Bar Charts
 
 ```{r}
 
@@ -118,53 +122,255 @@ ggplot(wetlands, aes(Season))+
   geom_bar()
 
 
-##filter out first and last years
-##filter out AN3/ AS/ SP/TV/ UP
+```
 
-wetlands2 <- wetlands %>% 
-  filter(!(Year  %in% c(2015, 2025))) %>% 
-  filter(!(Site %in% c("AN3", "AS", "SP", "TV", "UP", "DP")))
 
-ggplot(wetlands2, aes(Site))+
-  geom_bar()
+# Data Exploration: Scatter and Box Plots
 
-ggplot(wetlands2, aes(Year))+
-  geom_bar()
+```{r}
+#Continuous Variables: 
+#- DO% / DO mg_L/ pH / LogTSS
+#Categorical Variables:
+#- Site/ month/ Year/ season
+
+DO_types_plot <- ggplot(wetlands, aes(x = DO_mgL, y = DO_percent)) +
+  geom_point()
+DO_types_plot
+
+#variables extremely correlated (as expected) should not be used in the same model
+
+DO_pH_plot <- ggplot(wetlands, aes(x = pH, y = DO_percent)) +
+  geom_point()
+DO_pH_plot
+
+  
+DO_pH_plot2 <- ggplot(wetlands, aes(x = pH, y = DO_mgL)) +
+  geom_point()
+DO_pH_plot2
+
+#pH does not seem correlated with either DO mgl or DO %
+
+DO_TSS_plot <- ggplot(wetlands, aes(x = Log_TSS_mgL, y = DO_percent)) +
+  geom_point()
+DO_TSS_plot
+
+  
+DO_TSS_plot2 <- ggplot(wetlands, aes(x = Log_TSS_mgL, y = DO_mgL)) +
+  geom_point()
+DO_TSS_plot2
+
+#logTSS does not seem correlated with either DO mgl or DO %
+
+DO_season_plot <- ggplot(wetlands, aes(x = Season, y = DO_mgL)) +
+  geom_boxplot()
+DO_season_plot
+
+#season appears to influence DO mgL but not too much to avoid using together
+
+
+TSS_season_plot <- ggplot(wetlands, aes(x = Season, y = Log_TSS_mgL)) +
+  geom_boxplot()
+TSS_season_plot
+
+#season does not appear to strongly influence TSS 
+
+#site based differences?
+
+TSS_site_plot <- ggplot(wetlands, aes(x = Site, y = Log_TSS_mgL)) +
+  geom_boxplot()
+TSS_site_plot
+
+#potential influences of site on TSS
+
+O2_site_plot <- ggplot(wetlands, aes(x = Site, y = DO_mgL)) +
+  geom_boxplot()
+O2_site_plot
+
+#no signif differences
 
 
 ```
 
 
+# potential further filtering of data ?
 
-## NEED TO do correlations first!!
-
-## Linear Models
+removal of sites and years with the lowest number of observations, probably should only use if we are going to do nested linear reg? 
+decided to not do/ can write in future directions maybe
 
 ```{r}
 
-wetlandsO2_perc.lm <- (Log_Filtered_NOx_ugL ~ DO_percent + pH + Log_TSS_mgl + Season)
-  
-wetlandsO2_mgL.lm <- 
+##filter out first and last years
+##filter out AN3/ AS/ SP/TV/ UP
+
+#wetlands2 <- wetlands %>% 
+ # filter(!(Year  %in% c(2015, 2025))) %>% 
+ # filter(!(Site %in% c("AN3", "AS", "SP", "TV", "UP", "DP")))
+
+#ggplot(wetlands2, aes(Site))+
+ # geom_bar()
+
+#ggplot(wetlands2, aes(Year))+
+ # geom_bar()
+
+```
+
+
+
+# Linear Models
+
+
+## Which Oxygen Measurement to Use
+
+```{r}
+
+#Determining which oxygen measurement would be best to use in the models
+wetlandsO2_perc.lm <- lm(Log_Filtered_NOx_ugL ~ DO_percent,
+                       data = wetlands)
+summary(wetlandsO2_perc.lm)
+AIC(wetlandsO2_perc.lm)
+#DO % AIC = 5991.301
+
+wetlandsO2_mgL.lm <-  lm(Log_Filtered_NOx_ugL ~ DO_mgL,
+                         data = wetlands)
+summary(wetlandsO2_mgL.lm)
+AIC(wetlandsO2_mgL.lm)
+#DO mgL AIC = 6010.893
+
+#The oxygen measurements were fairly similar in predictive power, however the DO% had a slightly more powerful AIC value and will be used in further models
+
+
+
+
+```
+
+# further modeling
+
+```{r}
+
+#fix AIC and r squared
+
+seasonbased.lm <- lm(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + pH + Season + Site + Year,
+                       data = wetlands)
+summary(seasonbased.lm)
+AIC(seasonbased.lm)
+#AIC: 4588.897
+#Adj R2: 0.5487
+#p-value: < 2.2e-16
+
+
+#this model provides the best fit for predicting NO3 concentrations
+monthbased.lm <- lm(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + pH + Month + Site + Year,
+                       data = wetlands)
+summary(monthbased.lm)
+AIC(monthbased.lm)
+#AIC: 4563.233
+#adj r2: 0.5559 
+#p-value: < 2.2e-16
+
+
+#removed pH/ year because was the least significant, kept month over season because lower AIC value/ higher adj r2
+nopH.lm <- lm(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Month + Site,
+                       data = wetlands)
+summary(nopH.lm)
+AIC(nopH.lm)
+plot(nopH.lm)
+#AIC: 4560.75
+#multiple r2: 0.556  
+#p-value: < 2.2e-16
+
+AIC(seasonbased.lm, monthbased.lm, nopH.lm)
+
+## AIC/ R2 is only slightly better, however we are going to go with the simpler model?
+
+```
+
+
+Lm with no pH/ year had the lowest degrees of freedom/ was the simplest model/ had the lowest AIC - will be used for nested/ mixed effects
+
+##Mixed Effects Models
+
+```{r}
+
+
+nox.lmm1 <- lme(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Month, 
+                  random = ~1|Site, data = wetlands)
+
+plot(nox.lmm1)
+qqnorm(nox.lmm1)
+summary(nox.lmm1)
+AIC(nox.lmm1)
+
+nox.lmm2 <- lme(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Month, 
+                  random = ~1|Year, data = wetlands)
+
+plot(nox.lmm2)
+qqnorm(nox.lmm2)
+summary(nox.lmm2)
+AIC(nox.lmm2)
+
+nox.lmm3 <- lme(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Month, 
+                  random = ~1|Site/Year, data = wetlands)
+
+plot(nox.lmm3)
+qqnorm(nox.lmm3)
+summary(nox.lmm3)
+AIC(nox.lmm3)
+coef(nox.lmm3)
+tbl_regression(nox.lmm3)
+tbl_regression(nox.lmm3, tidy_fun = broom.helpers::tidy_parameters)
+
+
+AIC(nox.lmm1, nox.lmm2, nox.lmm3)
+
+
+#refit model 
+# even with refitting, month provided a better AIC than 
+monthbased.gls <- gls(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Month + Site,
+                       data = wetlands)
+summary(monthbased.gls)
+AIC(monthbased.gls)
+#AIC: 4628.224
+
+seasonbased.gls <- gls(Log_Filtered_NOx_ugL ~ DO_percent + Log_TSS_mgL + Season + Site,
+                       data = wetlands)
+summary(monthbased.gls)
+AIC(seasonbased.gls)
+#AIC: 4657.308
+
+AIC(monthbased.gls, seasonbased.gls)
+
+
+AIC(monthbased.gls, nox.lmm3)
+
+
+```
+
+
+Best model: mixed effects model with site nested in year. Interesting because initially took year out of the linear model. 
+
+
+##plots
+
+```{r}
+
+#predicted vs observed plots
+
+wetlands$predicted_nox <- predict(nox.lmm3)
+ggplot(wetlands, aes(x = predicted_nox, y = Log_Filtered_NOx_ugL)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  theme_minimal() +
+  labs(title = "Predicted vs Observed NOₓ",
+       x = "Predicted Log(NOₓ µg/L)",
+       y = "Observed Log(NOₓ µg/L)")
+
+#Residuals plot
+
 
 
 ```
 
 
 
-Notes: 
 
-Continuous Variables: 
-- DO% / DO mg_L/ pH / LogTSS
-Categorical Variables:
-- Site/ month/ Year/ season
-
-Look at
-- DO% vs DO mg/L
-- season v month v year
-- combinations of season + year/ month + year
-
-Random Effects
-- site
-- year
-- potentially site nested in year
 
