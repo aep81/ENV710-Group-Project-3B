@@ -450,3 +450,43 @@ ggplot(log_wetland, aes(x = Site, y = Log_Filtered_NHx_ugL, color = Season)) +
   geom_boxplot()
 
 ```
+
+## prediction vs observed
+```{r pred}
+log_wetland$predicted_nhx <- predict(MEM2)
+
+pred_vs_obs <- ggplot(log_wetland, aes(x = Log_Filtered_NHx_ugL, y = predicted_nhx)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  theme_bw() +
+  labs(title = "Predicted vs Observed NHₓ",
+       x = "Observed Log(NHₓ µg/L)",
+       y = "Predicted Log(NHₓ µg/L)") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
+
+ggsave("NHx_pred_vs_obs.png", pred_vs_obs, width = 12, height = 6, dpi = 300)
+
+residuals <- resid(MEM2)
+fitted <- fitted(MEM2)
+
+res_df <- data.frame(
+  Fitted = fitted,
+  Residuals = residuals
+)
+
+ res_vs_fit <- ggplot(res_df, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  theme_bw() +
+  labs(title = "Residuals vs. Fitted",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme(axis.text = element_text(size = 14, color = "black"),
+        axis.title = element_text(size = 14),
+        title = element_text(size = 16))
+
+ggsave("NHx_res_vs_fit.png", pred_vs_obs, width = 12, height = 6, dpi = 300)
+
+```
