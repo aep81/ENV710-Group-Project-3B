@@ -14,6 +14,7 @@ library(here)
 library(tidyverse)
 library(nlme)
 library(gtsummary)
+library(cowplot)
 
 wetlands <- read.csv(here('Data/Processed/Combined_Data_NArm.csv'))
 
@@ -259,6 +260,9 @@ SpCond and Sal are too correlated to use together - makes sense. Also all the pr
 # Step 3 - Fit regular regression model
 I think I'm going to try three models.
 ```{r generalized regression models}
+#remove NA's
+log_wetland <- na.omit(log_wetland)
+
 #first convert characters to factors
 log_wetland$Season <- factor(log_wetland$Season, 
                            levels = c('Fall', 'Winter', 'Spring', 'Summer'))
@@ -271,7 +275,7 @@ mod1 <- lm(Log_Filtered_NHx_ugL ~ Season,
            data = log_wetland)
 
 #next add predictor variables with highest correlation to NHx
-mod2 <- lm(Log_Filtered_NHx_ugL ~ Season + DO_mgL + Log_Unfiltered_TP_ugL,
+mod2 <- lm(Log_Filtered_NHx_ugL ~ Season + DO_mgL + Log_Unfiltered_TP_ugL + Site,
            data = log_wetland)
 
 #keep adding based on correlation (TSS was not significant even though it had the same value of correlation as TDS)
@@ -294,8 +298,6 @@ plot(mod3)
 # Step 4 - Fit Mixed Effects Model and Examine Model Results
 ## use gls model first 
 ```{r gls}
-#remove NA's
-log_wetland <- na.omit(log_wetland)
 
 #first refit models using generalized least squares
 GLS1 <- gls(Log_Filtered_NHx_ugL ~ Season,
@@ -453,8 +455,10 @@ ggplot(log_wetland, aes(x = Site, y = Log_Filtered_NHx_ugL, color = Season)) +
 
 ## prediction vs observed
 ```{r pred}
+#predict NHx values
 log_wetland$predicted_nhx <- predict(MEM2)
 
+#plot predicted vs observed NHx values
 pred_vs_obs <- ggplot(log_wetland, aes(x = Log_Filtered_NHx_ugL, y = predicted_nhx)) +
   geom_point(alpha = 0.4) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
@@ -466,7 +470,9 @@ pred_vs_obs <- ggplot(log_wetland, aes(x = Log_Filtered_NHx_ugL, y = predicted_n
         axis.title = element_text(size = 14),
         title = element_text(size = 16))
 
+#save image
 ggsave("NHx_pred_vs_obs.png", pred_vs_obs, width = 12, height = 6, dpi = 300)
+
 
 residuals <- resid(MEM2)
 fitted <- fitted(MEM2)
@@ -486,7 +492,9 @@ res_df <- data.frame(
   theme(axis.text = element_text(size = 14, color = "black"),
         axis.title = element_text(size = 14),
         title = element_text(size = 16))
+ 
+#NHx_diagnostics <- plot_grid(pred_vs_obs, res_vs_fit, labels = c("A", "B"), ncol = 2, align = "h")
 
-ggsave("NHx_res_vs_fit.png", pred_vs_obs, width = 12, height = 6, dpi = 300)
+#ggsave("NHx_diagnostics.png", NHx_diagnostics, width = 12, height = 6, dpi = 300)
 
 ```
